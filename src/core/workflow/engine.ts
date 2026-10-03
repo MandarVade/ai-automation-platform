@@ -3,12 +3,13 @@ import { WorkflowExecutionReport, NodeExecutionRecord } from '../../types/execut
 import { DAGValidator } from './dag-validator';
 import { DeviceContextManager } from '../resources/device-context';
 import { ModelSelector } from '../model/selector';
+import { ModelRegistry } from '../model/registry';
 import { ExecutionRouter } from '../routing/execution-router';
 import { ModelLifecycleManager } from '../model/lifecycle';
 import { IntermediateResultCache } from '../cache/result-cache';
 import { AIRuntimeEngine } from '../runtime/ai-runtime';
 import { AndroidActionLayer } from '../actions/android-actions';
-import { ModelSpec } from '../../types/model';
+import { ModelSpec, ExecutionLocation } from '../../types/model';
 import { ReceiptParser } from './receipt-parser';
 
 export type EngineEventCallback = (
@@ -175,22 +176,64 @@ export class WorkflowEngine {
         }
 
         if (node.type === 'AI') {
-          // A. Select Best Model
           const currentDevice = deviceManager.getContext();
-          const selection = ModelSelector.selectBestModel(
-            node.capability as any,
-            currentDevice,
-            node.executionPolicy,
-            node.assignedModelId
+
+          // Detect whether input contains a genuine uploaded user image
+          const hasRealImage = Boolean(
+            stepInput && (
+              stepInput.image ||
+              stepInput.dataUrl ||
+              stepInput.file ||
+              stepInput.isRealUpload ||
+              (typeof stepInput === 'string' && (stepInput.startsWith('data:image') || stepInput.startsWith('blob:') || stepInput.startsWith('http') || /\.(png|jpe?g|webp|bmp|gif)$/i.test(stepInput.trim())))
+            )
           );
 
-          let chosenModel: ModelSpec = selection.selectedModel;
-          record.selectedModelId = chosenModel.id;
-          record.selectedModelName = chosenModel.name;
-          record.scoreBreakdown = selection.breakdown;
+          let chosenModel: ModelSpec;
 
-          record.logLines.push(`Model selected: ${chosenModel.name} (Score: ${selection.breakdown.totalScore}/100)`);
-          record.logLines.push(...selection.breakdown.reasons.map((r) => `  ✓ ${r}`));
+          if (node.capability === 'OCR' && hasRealImage) {
+            // Real User Image mode: RealOCREngine via on-device Tesseract.js / WASM MUST be selected
+            const tesseractModel = ModelRegistry.getById('tesseract-mobile-lite');
+            chosenModel = tesseractModel || {
+              id: 'tesseract-wasm',
+              name: 'Tesseract.js / WASM',
+              version: 'v7.0.0-wasm',
+              capability: 'OCR',
+              inputType: 'IMAGE',
+              outputType: 'TEXT',
+              sizeMb: 12,
+              ramRequirementMb: 65,
+              quantization: 'INT8',
+              supportedDelegates: ['CPU'],
+              expectedLatencyMs: 380,
+              qualityScore: 0.95,
+              batteryImpact: 'LOW',
+              isLocalAvailable: true,
+              isCloudAvailable: false,
+              description: 'Tesseract.js WebAssembly on-device Optical Character Recognition'
+            };
+
+            record.selectedModelId = chosenModel.id;
+            record.selectedModelName = 'Tesseract.js / WASM';
+            record.executionLocation = 'LOCAL_CPU';
+            record.logLines.push('● REAL INFERENCE: User uploaded image detected. Routing directly to On-Device Tesseract.js / WASM.');
+          } else {
+            // Preset Demo or other AI capability: standard ModelSelector evaluation
+            const selection = ModelSelector.selectBestModel(
+              node.capability as any,
+              currentDevice,
+              node.executionPolicy,
+              node.assignedModelId
+            );
+
+            chosenModel = selection.selectedModel;
+            record.selectedModelId = chosenModel.id;
+            record.selectedModelName = chosenModel.name;
+            record.scoreBreakdown = selection.breakdown;
+
+            record.logLines.push(`Model selected: ${chosenModel.name} (Score: ${selection.breakdown.totalScore}/100)`);
+            record.logLines.push(...selection.breakdown.reasons.map((r) => `  ✓ ${r}`));
+          }
 
           // B. Check Deterministic Intermediate Result Cache
           const cacheKey = resultCache.generateKey(
@@ -218,10 +261,18 @@ export class WorkflowEngine {
           }
 
           // C. Decide Route (Local vs Cloud)
-          const routing = ExecutionRouter.decideRoute(chosenModel, currentDevice, node.executionPolicy);
-          record.executionLocation = routing.targetLocation;
-          record.logLines.push(`Routing decision: ${routing.mode} via ${routing.targetLocation}`);
-          record.logLines.push(...routing.reasoning.map((r) => `  → ${r}`));
+          let targetLocation: ExecutionLocation;
+          if (node.capability === 'OCR' && hasRealImage) {
+            targetLocation = 'LOCAL_CPU';
+            record.executionLocation = 'LOCAL_CPU';
+            record.logLines.push('Routing decision: ON_DEVICE via LOCAL_CPU (WASM execution)');
+          } else {
+            const routing = ExecutionRouter.decideRoute(chosenModel, currentDevice, node.executionPolicy);
+            targetLocation = routing.targetLocation;
+            record.executionLocation = routing.targetLocation;
+            record.logLines.push(`Routing decision: ${routing.mode} via ${routing.targetLocation}`);
+            record.logLines.push(...routing.reasoning.map((r) => `  → ${r}`));
+          }
 
           // D. Dynamic Model Lifecycle - Load Model
           record.logLines.push(`Model Lifecycle: allocating ${chosenModel.ramRequirementMb}MB in RAM...`);
@@ -238,7 +289,7 @@ export class WorkflowEngine {
           try {
             inferenceResponse = await aiRuntime.executeInference({
               model: chosenModel,
-              location: routing.targetLocation,
+              location: targetLocation,
               inputType: node.inputTypes[0] || 'TEXT',
               outputType: node.outputType,
               inputData: stepInput,
@@ -377,7 +428,7 @@ export class WorkflowEngine {
       return actionLayer.recordExpense({
         vendor: input?.vendor || 'Retail Merchant',
         items: input?.items,
-        subtotal: input?.subtotal,
+        subtotal: input?.subtotal ?? input?.calculatedSubtotal,
         tax: input?.tax,
         total: input?.grandTotal || input?.total || 15.00,
         category: input?.category || 'General Expense'

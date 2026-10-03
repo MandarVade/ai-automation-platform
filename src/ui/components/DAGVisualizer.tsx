@@ -19,11 +19,10 @@ export const DAGVisualizer: React.FC<DAGVisualizerProps> = ({
   onConnectNodes
 }) => {
   const [connectingSourceId, setConnectingSourceId] = React.useState<string | null>(null);
-  const nodeMap = new Map(workflow.nodes.map((n) => [n.id, n]));
 
   // Auto-layout coordinates if positions missing
   const computedNodes = workflow.nodes.map((node, index) => {
-    const x = node.position?.x ?? 60 + index * 240;
+    const x = node.position?.x ?? 50 + index * 260;
     const y = node.position?.y ?? 180;
     return { ...node, x, y };
   });
@@ -31,11 +30,11 @@ export const DAGVisualizer: React.FC<DAGVisualizerProps> = ({
   const nodePosMap = new Map(computedNodes.map((n) => [n.id, { x: n.x, y: n.y }]));
 
   // Calculate bounding box
-  const maxX = Math.max(...computedNodes.map((n) => n.x), 900) + 240;
-  const maxY = Math.max(...computedNodes.map((n) => n.y), 340) + 120;
+  const maxX = Math.max(...computedNodes.map((n) => n.x), 960) + 260;
+  const maxY = Math.max(...computedNodes.map((n) => n.y), 360) + 140;
 
   return (
-    <div className="dag-canvas-container">
+    <div className="dag-canvas-container relative">
       <svg
         className="dag-svg-overlay"
         viewBox={`0 0 ${maxX} ${maxY}`}
@@ -51,7 +50,7 @@ export const DAGVisualizer: React.FC<DAGVisualizerProps> = ({
             markerHeight="6"
             orient="auto-start-reverse"
           >
-            <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#000000" />
           </marker>
           <marker
             id="dag-arrow-active"
@@ -62,7 +61,7 @@ export const DAGVisualizer: React.FC<DAGVisualizerProps> = ({
             markerHeight="6"
             orient="auto-start-reverse"
           >
-            <path d="M 0 1 L 10 5 L 0 9 z" fill="#3b82f6" />
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#00F0FF" />
           </marker>
         </defs>
 
@@ -73,10 +72,10 @@ export const DAGVisualizer: React.FC<DAGVisualizerProps> = ({
 
           if (!srcPos || !tgtPos) return null;
 
-          const startX = srcPos.x + 190;
-          const startY = srcPos.y + 40;
+          const startX = srcPos.x + 210;
+          const startY = srcPos.y + 45;
           const endX = tgtPos.x;
-          const endY = tgtPos.y + 40;
+          const endY = tgtPos.y + 45;
 
           const dx = endX - startX;
           const midX1 = startX + dx * 0.5;
@@ -87,26 +86,38 @@ export const DAGVisualizer: React.FC<DAGVisualizerProps> = ({
 
           return (
             <g key={edge.id}>
+              {/* Drop Shadow Line */}
               <path
                 d={pathD}
                 fill="none"
-                stroke={isEdgeActive ? '#3b82f6' : '#334155'}
-                strokeWidth={isEdgeActive ? '2.5' : '1.5'}
-                strokeDasharray={isEdgeActive ? '5 5' : 'none'}
+                stroke="#000000"
+                strokeWidth={isEdgeActive ? '3.5' : '2'}
+                strokeDasharray={isEdgeActive ? '6 4' : 'none'}
                 markerEnd={isEdgeActive ? 'url(#dag-arrow-active)' : 'url(#dag-arrow)'}
               />
-              {/* Edge Data Type Label */}
-              <text
-                x={(startX + endX) / 2}
-                y={(startY + endY) / 2 - 6}
-                fill="#94a3b8"
-                fontSize="9"
-                fontFamily="var(--font-mono)"
-                textAnchor="middle"
-                style={{ background: '#0b0e14' }}
-              >
-                {edge.dataType}
-              </text>
+              {/* Edge Data Type Tag */}
+              <g transform={`translate(${(startX + endX) / 2}, ${(startY + endY) / 2 - 12})`}>
+                <rect
+                  x="-32"
+                  y="-10"
+                  width="64"
+                  height="16"
+                  fill="#FFFFFF"
+                  stroke="#000000"
+                  strokeWidth="1.5"
+                />
+                <text
+                  x="0"
+                  y="2"
+                  fill="#000000"
+                  fontSize="9"
+                  fontWeight="bold"
+                  fontFamily="var(--font-mono)"
+                  textAnchor="middle"
+                >
+                  {edge.dataType}
+                </text>
+              </g>
             </g>
           );
         })}
@@ -114,20 +125,20 @@ export const DAGVisualizer: React.FC<DAGVisualizerProps> = ({
 
       {/* Render Node Elements */}
       <div style={{ position: 'relative', width: `${maxX}px`, height: `${maxY}px` }}>
-        {computedNodes.map((node) => {
+        {computedNodes.map((node, index) => {
           const statusInfo = nodeStatusMap[node.id];
           const status = statusInfo?.status || 'IDLE';
           const isSelected = selectedNodeId === node.id;
           const isActive = activeNodeId === node.id;
 
-          const typeColor =
+          const categoryColor =
             node.type === 'TRIGGER'
-              ? '#38bdf8'
+              ? 'bg-amber-300 text-black'
               : node.type === 'AI'
-              ? '#2dd4bf'
+              ? 'bg-cyan-300 text-black'
               : node.type === 'TRANSFORM'
-              ? '#fbbf24'
-              : '#a78bfa';
+              ? 'bg-purple-300 text-black'
+              : 'bg-emerald-300 text-black';
 
           return (
             <div
@@ -135,50 +146,46 @@ export const DAGVisualizer: React.FC<DAGVisualizerProps> = ({
               className={`dag-node-element status-${status} ${isSelected ? 'selected' : ''} ${
                 isActive ? 'status-RUNNING' : ''
               }`}
-              style={{ left: `${node.x}px`, top: `${node.y}px` }}
+              style={{
+                left: `${node.x}px`,
+                top: `${node.y}px`,
+                width: '210px',
+                border: '2px solid #000000',
+                boxShadow: isSelected
+                  ? '5px 5px 0px #FACC15'
+                  : '4px 4px 0px #000000',
+                backgroundColor: '#FFFFFF',
+                borderRadius: '0px'
+              }}
               onClick={() => onSelectNode && onSelectNode(node)}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span className="node-type-indicator" style={{ color: typeColor }}>
-                  {node.type}
+              {/* Stage & Category Banner */}
+              <div className="flex items-center justify-between pb-1.5 border-b border-black mb-1.5">
+                <span className={`px-1.5 py-0.2 text-[9px] font-mono font-black uppercase border border-black ${categoryColor}`}>
+                  STAGE 0{index + 1} // {node.type}
                 </span>
+
                 {status !== 'IDLE' && (
-                  <span
-                    className="status-pill"
-                    style={{
-                      fontSize: '9px',
-                      padding: '1px 4px',
-                      color:
-                        status === 'SUCCESS'
-                          ? 'var(--status-success)'
-                          : status === 'RUNNING'
-                          ? 'var(--accent-blue)'
-                          : status === 'FALLBACK'
-                          ? 'var(--status-fallback)'
-                          : status === 'FAILED'
-                          ? 'var(--status-error)'
-                          : 'var(--text-muted)'
-                    }}
-                  >
+                  <span className="px-1 py-0.2 text-[8px] font-mono font-black uppercase border border-black bg-zinc-100">
                     {status}
                   </span>
                 )}
               </div>
 
-              <div className="node-label-text" title={node.label}>
+              {/* Node Label */}
+              <div className="font-mono font-black text-xs uppercase truncate text-black" title={node.label}>
                 {node.label}
               </div>
 
-              <div className="node-sub-text">
+              {/* Model / Runtime Metadata */}
+              <div className="text-[10px] font-mono text-zinc-600 truncate mt-1">
                 {statusInfo?.modelName ? (
-                  <span style={{ color: 'var(--accent-cyan)' }}>{statusInfo.modelName}</span>
+                  <span className="text-cyan-800 font-bold">{statusInfo.modelName}</span>
                 ) : (
                   <span>{node.capability}</span>
                 )}
                 {statusInfo?.latencyMs !== undefined && (
-                  <span style={{ marginLeft: '6px', color: 'var(--text-muted)' }}>
-                    ({statusInfo.latencyMs}ms)
-                  </span>
+                  <span className="ml-1 font-bold text-zinc-800">({statusInfo.latencyMs}ms)</span>
                 )}
               </div>
 
@@ -188,17 +195,18 @@ export const DAGVisualizer: React.FC<DAGVisualizerProps> = ({
                   className="dag-port-input"
                   style={{
                     position: 'absolute',
-                    left: '-7px',
-                    top: '32px',
-                    width: '14px',
-                    height: '14px',
-                    borderRadius: '50%',
+                    left: '-8px',
+                    top: '38px',
+                    width: '16px',
+                    height: '16px',
+                    borderRadius: '0px',
                     background: '#10b981',
-                    border: '2px solid #0f172a',
+                    border: '2px solid #000000',
+                    boxShadow: '1px 1px 0px #000000',
                     cursor: 'pointer',
                     zIndex: 25
                   }}
-                  title="Connect Here (Input Port) — Drop or click to connect"
+                  title="Connect Here (Input Port) — Click or drop to connect"
                   onDragOver={(e) => {
                     e.preventDefault();
                     e.dataTransfer.dropEffect = 'link';
@@ -227,13 +235,14 @@ export const DAGVisualizer: React.FC<DAGVisualizerProps> = ({
                 className="dag-port-output"
                 style={{
                   position: 'absolute',
-                  right: '-7px',
-                  top: '32px',
-                  width: '14px',
-                  height: '14px',
-                  borderRadius: '50%',
-                  background: connectingSourceId === node.id ? '#f59e0b' : '#3b82f6',
-                  border: '2px solid #0f172a',
+                  right: '-8px',
+                  top: '38px',
+                  width: '16px',
+                  height: '16px',
+                  borderRadius: '0px',
+                  background: connectingSourceId === node.id ? '#facc15' : '#00f0ff',
+                  border: '2px solid #000000',
+                  boxShadow: '1px 1px 0px #000000',
                   cursor: 'crosshair',
                   zIndex: 25
                 }}

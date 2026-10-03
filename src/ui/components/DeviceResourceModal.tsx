@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { DeviceContextManager } from '../../core/resources/device-context';
 import { DeviceContext, ThermalStatus, NetworkState } from '../../types/device';
+import { Button } from './Button';
+import { Badge } from './Badge';
+import { Sliders, X, Zap, Cpu, Battery, Wifi, Shield } from 'lucide-react';
 
 interface DeviceResourceModalProps {
   isOpen: boolean;
@@ -21,62 +24,79 @@ export const DeviceResourceModal: React.FC<DeviceResourceModalProps> = ({ isOpen
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-dialog" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '580px' }}>
-        <div className="modal-header">
-          <div>
-            <h3 style={{ fontSize: '15px', fontWeight: 600 }}>Device Resource Simulator</h3>
-            <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-              Test autonomous model selection, routing, and fallbacks under edge constraints.
-            </p>
+      <div
+        className="modal-dialog max-w-2xl border-3 border-black bg-white shadow-[6px_6px_0px_#000]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Amber Header */}
+        <div className="modal-header bg-amber-400 border-b-2 border-black p-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Sliders className="w-5 h-5 text-black" />
+            <div>
+              <h3 className="text-base font-black font-mono uppercase text-black">
+                DEVICE RESOURCE CONTEXT SIMULATOR
+              </h3>
+              <p className="text-xs font-mono font-medium text-zinc-800">
+                Test autonomous model selection, routing, and fallbacks under edge constraints.
+              </p>
+            </div>
           </div>
-          <button className="btn-secondary" onClick={onClose} style={{ padding: '4px 8px' }}>
-            ✕
-          </button>
+          <Button variant="outline" size="sm" onClick={onClose} className="p-1 h-8 w-8">
+            <X className="w-4 h-4" />
+          </Button>
         </div>
 
-        <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {/* Quick Presets for Judges */}
+        {/* Modal Body */}
+        <div className="modal-body p-5 space-y-4 font-mono text-xs">
+          {/* Quick Presets */}
           <div>
-            <label className="stat-label">Quick Scenarios for Demonstration</label>
-            <div style={{ display: 'flex', gap: '8px', marginTop: '6px', flexWrap: 'wrap' }}>
-              <button
-                className="btn-secondary"
-                style={{ fontSize: '11px' }}
+            <div className="text-[10px] font-bold text-zinc-500 uppercase mb-2">
+              DEMONSTRATION HARDWARE PROFILES:
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                className="text-[11px]"
                 onClick={() => {
                   manager.presetNominalHighEnd();
                   setContext(manager.getContext());
                 }}
               >
                 🚀 Flagship (Pixel 8 / NPU / 12GB)
-              </button>
-              <button
-                className="btn-secondary"
-                style={{ fontSize: '11px' }}
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="text-[11px]"
                 onClick={() => {
                   manager.presetBudgetConstrained();
                   setContext(manager.getContext());
                 }}
               >
-                📱 Budget Device (4GB RAM / Metered)
-              </button>
-              <button
-                className="btn-secondary"
-                style={{ fontSize: '11px' }}
+                📱 Budget (4GB RAM / Metered)
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="text-[11px]"
                 onClick={() => {
                   manager.presetOfflineLowBattery();
                   setContext(manager.getContext());
                 }}
               >
                 ⚠️ Offline Critical (14% Bat / Severe)
-              </button>
+              </Button>
             </div>
           </div>
 
           {/* Available RAM Slider */}
-          <div style={{ background: 'var(--bg-app)', padding: '12px', borderRadius: '6px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-              <span style={{ fontSize: '13px', fontWeight: 500 }}>Available RAM Headroom</span>
-              <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--accent-cyan)' }}>
+          <div className="border-2 border-black p-3.5 bg-zinc-50 shadow-[2px_2px_0px_#000]">
+            <div className="flex justify-between items-center mb-1.5 font-bold">
+              <span className="text-zinc-800 uppercase flex items-center gap-1.5">
+                <Cpu className="w-3.5 h-3.5" /> Available RAM Headroom
+              </span>
+              <span className="text-cyan-800 text-sm font-black">
                 {context.availableRamMb} MB / {context.totalRamMb} MB
               </span>
             </div>
@@ -87,9 +107,9 @@ export const DeviceResourceModal: React.FC<DeviceResourceModalProps> = ({ isOpen
               step="128"
               value={context.availableRamMb}
               onChange={(e) => handleUpdate({ availableRamMb: Number(e.target.value) })}
-              style={{ width: '100%' }}
+              className="w-full accent-black cursor-pointer"
             />
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: 'var(--text-muted)' }}>
+            <div className="flex justify-between text-[10px] text-zinc-500 mt-1">
               <span>512 MB (OOM Risk)</span>
               <span>2048 MB (Mid-range)</span>
               <span>8192 MB (Flagship)</span>
@@ -97,11 +117,13 @@ export const DeviceResourceModal: React.FC<DeviceResourceModalProps> = ({ isOpen
           </div>
 
           {/* Battery & Charging */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <div style={{ background: 'var(--bg-app)', padding: '12px', borderRadius: '6px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                <span style={{ fontSize: '13px', fontWeight: 500 }}>Battery Reserve</span>
-                <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}>{context.batteryPercentage}%</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="border-2 border-black p-3.5 bg-zinc-50 shadow-[2px_2px_0px_#000]">
+              <div className="flex justify-between items-center mb-1.5 font-bold">
+                <span className="text-zinc-800 uppercase flex items-center gap-1.5">
+                  <Battery className="w-3.5 h-3.5" /> Battery Reserve
+                </span>
+                <span className="text-sm font-black">{context.batteryPercentage}%</span>
               </div>
               <input
                 type="range"
@@ -109,97 +131,83 @@ export const DeviceResourceModal: React.FC<DeviceResourceModalProps> = ({ isOpen
                 max="100"
                 value={context.batteryPercentage}
                 onChange={(e) => handleUpdate({ batteryPercentage: Number(e.target.value) })}
-                style={{ width: '100%' }}
+                className="w-full accent-black cursor-pointer"
               />
             </div>
 
-            <div style={{ background: 'var(--bg-app)', padding: '12px', borderRadius: '6px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px' }}>
+            <div className="border-2 border-black p-3.5 bg-zinc-50 shadow-[2px_2px_0px_#000] flex flex-col justify-center">
+              <label className="flex items-center gap-2 cursor-pointer font-bold select-none">
                 <input
                   type="checkbox"
                   checked={context.isCharging}
                   onChange={(e) => handleUpdate({ isCharging: e.target.checked })}
+                  className="w-4 h-4 accent-black"
                 />
-                Device Connected to Charger
+                <span className="text-zinc-900 uppercase">Device Plugged into Charger (AC)</span>
               </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', marginTop: '8px' }}>
-                <input
-                  type="checkbox"
-                  checked={context.powerSaverEnabled}
-                  onChange={(e) => handleUpdate({ powerSaverEnabled: e.target.checked })}
-                />
-                Android Battery Saver Active
-              </label>
+              <div className="text-[10px] text-zinc-500 mt-1">
+                Disables aggressive thermal power throttling.
+              </div>
             </div>
           </div>
 
-          {/* Connectivity & Cloud Inference */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <div>
-              <label className="stat-label">Network State</label>
-              <select
-                value={context.networkState}
-                onChange={(e) => handleUpdate({ networkState: e.target.value as NetworkState })}
-                style={{
-                  width: '100%',
-                  padding: '8px',
-                  background: 'var(--bg-app)',
-                  border: '1px solid var(--border-default)',
-                  borderRadius: '4px',
-                  color: 'var(--text-primary)',
-                  marginTop: '4px'
-                }}
-              >
-                <option value="WIFI_HIGH_SPEED">Wi-Fi (High Speed Unmetered)</option>
-                <option value="CELLULAR_4G_5G">Cellular 4G/5G</option>
-                <option value="CELLULAR_METRED">Cellular Metered / Roaming</option>
-                <option value="OFFLINE">Offline (Airplane Mode)</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="stat-label">Thermal Throttling State</label>
+          {/* Thermal Status & Network State */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="border-2 border-black p-3.5 bg-zinc-50 shadow-[2px_2px_0px_#000]">
+              <label className="text-[10px] font-bold text-zinc-600 uppercase block mb-1.5">
+                Thermal Throttling State
+              </label>
               <select
                 value={context.thermalStatus}
                 onChange={(e) => handleUpdate({ thermalStatus: e.target.value as ThermalStatus })}
-                style={{
-                  width: '100%',
-                  padding: '8px',
-                  background: 'var(--bg-app)',
-                  border: '1px solid var(--border-default)',
-                  borderRadius: '4px',
-                  color: 'var(--text-primary)',
-                  marginTop: '4px'
-                }}
+                className="w-full p-2 bg-white border-2 border-black font-mono text-xs font-bold shadow-[2px_2px_0px_#000] cursor-pointer"
               >
-                <option value="NOMINAL">Nominal (Cool / No Throttling)</option>
-                <option value="MODERATE">Moderate Warmup</option>
-                <option value="SEVERE">Severe Heat (Throttling On)</option>
-                <option value="CRITICAL">Critical Thermal Pressure</option>
+                <option value="NOMINAL">NOMINAL (Cool)</option>
+                <option value="MODERATE">MODERATE (Warm)</option>
+                <option value="SEVERE">SEVERE (Throttled)</option>
+                <option value="CRITICAL">CRITICAL (Emergency)</option>
+              </select>
+            </div>
+
+            <div className="border-2 border-black p-3.5 bg-zinc-50 shadow-[2px_2px_0px_#000]">
+              <label className="text-[10px] font-bold text-zinc-600 uppercase block mb-1.5 flex items-center gap-1">
+                <Wifi className="w-3.5 h-3.5" /> Network State
+              </label>
+              <select
+                value={context.networkState}
+                onChange={(e) => handleUpdate({ networkState: e.target.value as NetworkState })}
+                className="w-full p-2 bg-white border-2 border-black font-mono text-xs font-bold shadow-[2px_2px_0px_#000] cursor-pointer"
+              >
+                <option value="WIFI_HIGH_SPEED">Wi-Fi 6 (High Speed)</option>
+                <option value="CELLULAR_4G_5G">5G / 4G LTE</option>
+                <option value="CELLULAR_METRED">Cellular Metered</option>
+                <option value="OFFLINE">OFFLINE (Zero Network)</option>
               </select>
             </div>
           </div>
 
-          {/* Privacy & Cloud Permission */}
-          <div style={{ background: 'var(--bg-app)', padding: '12px', borderRadius: '6px' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px' }}>
+          {/* Cloud Policy Toggle */}
+          <div className="border-2 border-black p-3 bg-zinc-50 shadow-[2px_2px_0px_#000] flex items-center justify-between">
+            <label className="flex items-center gap-2 cursor-pointer font-bold select-none">
               <input
                 type="checkbox"
                 checked={context.allowCloudInference}
                 onChange={(e) => handleUpdate({ allowCloudInference: e.target.checked })}
+                className="w-4 h-4 accent-black"
               />
-              <span style={{ fontWeight: 500 }}>Allow Cloud Inference</span>
+              <span className="uppercase text-xs">Allow Cloud Offload When Appropriate</span>
             </label>
-            <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px', marginLeft: '24px' }}>
-              When disabled, platform enforces 100% On-Device execution and rejects all external cloud endpoints.
-            </p>
+            <Badge variant={context.allowCloudInference ? 'success' : 'dark'} className="text-[10px]">
+              {context.allowCloudInference ? 'CLOUD ENABLED' : 'OFFLINE STRICT'}
+            </Badge>
           </div>
         </div>
 
-        <div className="modal-footer">
-          <button className="btn-primary" onClick={onClose}>
-            Apply Context
-          </button>
+        {/* Modal Footer */}
+        <div className="modal-footer p-4 border-t-2 border-black bg-zinc-100 flex justify-end gap-2">
+          <Button variant="default" size="sm" onClick={onClose}>
+            Apply & Close Simulator
+          </Button>
         </div>
       </div>
     </div>

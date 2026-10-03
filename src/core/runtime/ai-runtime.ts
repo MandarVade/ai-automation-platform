@@ -92,15 +92,17 @@ export class AIRuntimeEngine {
   private async executeOCR(input: any, model: ModelSpec, diag: string[]): Promise<string> {
     diag.push('Scanning image raster, locating text bounding boxes and line item segments...');
 
-    // Real OCR via Tesseract.js WebAssembly
-    const imagePayload = typeof input === 'object' && (input?.image || input?.dataUrl || input?.file)
-      ? (input.image || input.dataUrl || input.file)
-      : typeof input === 'object' && input?.rawText
-      ? input.rawText
+    // Extract real image data (base64 data URL, blob, file) or preset payload
+    const imagePayload = typeof input === 'object' && input !== null
+      ? (input.image || input.dataUrl || input.file || input.rawText || input)
       : input;
 
     const ocrResult = await RealOCREngine.recognizeImage(imagePayload);
-    diag.push(`● REAL INFERENCE: Tesseract.js WebAssembly engine processed image raster (${ocrResult.wordCount} words, ${ocrResult.confidence}% confidence).`);
+    if (ocrResult.isRealInference) {
+      diag.push(`● REAL INFERENCE: Tesseract.js WebAssembly engine processed image raster (${ocrResult.wordCount} words, ${ocrResult.confidence}% confidence).`);
+    } else {
+      diag.push(`● PRESET DEMO: Loaded deterministic test fixture (${ocrResult.wordCount} words).`);
+    }
     return ocrResult.rawText;
   }
 
@@ -273,23 +275,30 @@ Remember: Raft prioritizes safety and election determinism over Paxos complexity
 
     let total = 35.26;
     let vendor = 'Metro Wholesale & Organic Mart';
+    let subtotal = 32.50;
+    let tax = 2.76;
 
-    if (typeof input === 'object' && input.total) {
-      total = input.total;
-      if (input.items) parsedItems = input.items;
+    if (typeof input === 'object' && input !== null) {
+      if (input.total !== undefined) total = input.total;
+      if (input.items && Array.isArray(input.items) && input.items.length > 0) parsedItems = input.items;
       if (input.vendor) vendor = input.vendor;
+      if (input.subtotal !== undefined) subtotal = input.subtotal;
+      else subtotal = Math.round(parsedItems.reduce((acc, i) => acc + i.price, 0) * 100) / 100;
+      if (input.tax !== undefined) tax = input.tax;
+      else tax = Math.round(Math.max(0, total - subtotal) * 100) / 100;
     }
 
     return {
       vendor,
-      category: 'Groceries & Household Supplies',
-      subcategory: 'Organic Foodstuffs',
+      category: 'Food & Dining',
+      subcategory: 'Cafe & Restaurant Services',
       taxDeductible: false,
       items: parsedItems,
-      calculatedSubtotal: 32.50,
-      tax: 2.76,
+      subtotal,
+      calculatedSubtotal: subtotal,
+      tax,
       grandTotal: total,
-      arithmeticCheckPassed: true,
+      arithmeticCheckPassed: Math.abs((subtotal + tax) - total) < 0.05,
       confidenceScore: 0.96
     };
   }

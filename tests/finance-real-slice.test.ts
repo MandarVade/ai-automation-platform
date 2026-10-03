@@ -6,174 +6,238 @@ import { AndroidActionLayer } from '../src/core/actions/android-actions';
 import { WorkflowEngine } from '../src/core/workflow/engine';
 import { DEMO_WORKFLOWS } from '../src/data/templates';
 
-describe('Real Finance Vertical Slice (Phases 4-10, 15)', () => {
+describe('Real Finance Vertical Slice (Phases 4-10, 15) & OCR Integration', () => {
   beforeEach(() => {
     IntermediateResultCache.getInstance().clear();
   });
 
-  // 1. File / image input
-  it('1. should accept real user image input structure with metadata', () => {
+  // 1. Real image input reaches OCR adapter
+  it('1. should accept real user image input structure with metadata and reach OCR adapter', () => {
     const userImageInput = {
       type: 'IMAGE',
       image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
-      fileName: 'store_receipt_2026.png',
-      source: 'User File Input'
+      fileName: 'bean_and_brew_receipt.png',
+      source: 'Real User Uploaded File',
+      isRealUpload: true
     };
 
     expect(userImageInput.type).toBe('IMAGE');
     expect(userImageInput.image).toContain('data:image/png;base64');
-    expect(userImageInput.fileName).toBe('store_receipt_2026.png');
+    expect(userImageInput.fileName).toBe('bean_and_brew_receipt.png');
+    expect(userImageInput.isRealUpload).toBe(true);
   });
 
-  // 2. OCR adapter execution
-  it('2. should execute OCR adapter and return real inference contract', async () => {
+  // 2. RealOCREngine is selected when an uploaded image exists
+  it('2. should select RealOCREngine and Tesseract.js / WASM when an uploaded image exists in workflow', async () => {
+    const engine = WorkflowEngine.getInstance();
+    const financeWorkflow = DEMO_WORKFLOWS[0];
+
+    const imageInput = {
+      type: 'IMAGE',
+      image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+      fileName: 'user_uploaded_bill.png',
+      source: 'Real User Uploaded File',
+      isRealUpload: true
+    };
+
+    const report = await engine.executeWorkflow(financeWorkflow, imageInput);
+    expect(report.status).toBe('COMPLETED');
+
+    const ocrRecord = report.nodeRecords['node_bill_ocr'];
+    expect(ocrRecord).toBeDefined();
+    expect(ocrRecord.status).toBe('SUCCESS');
+    // Must NOT select Google Cloud Vision OCR when real uploaded image is present
+    expect(ocrRecord.selectedModelName).toBe('Tesseract.js / WASM');
+    expect(ocrRecord.selectedModelName).not.toBe('Google Cloud Vision OCR');
+    expect(ocrRecord.executionLocation).toBe('LOCAL_CPU');
+  });
+
+  // 3. Fixture/preset path is not used for real uploads
+  it('3. should execute RealOCREngine without falling back to Cafe Nero/Bakery fixture', async () => {
     const rasterData = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
     const ocrResult = await RealOCREngine.recognizeImage(rasterData);
 
     expect(ocrResult).toBeDefined();
-    expect(ocrResult.rawText).toBeTruthy();
-    expect(ocrResult.confidence).toBeGreaterThanOrEqual(0);
+    // Must not be the fake fallback fixture
+    expect(ocrResult.rawText).not.toContain('CAFE NERO');
+    expect(ocrResult.rawText).not.toContain('METRO MARKET');
     expect(ocrResult.runtime).toBe('TESSERACT_WASM_ON_DEVICE');
     expect(ocrResult.isRealInference).toBe(true);
   });
 
-  // 3. OCR output parsing
-  it('3. should parse raw OCR text into distinct lines and values', () => {
+  // 4. OCR runtime is Tesseract.js/WASM
+  it('4. should identify OCR runtime as Tesseract.js/WASM for real image inference', async () => {
+    const rasterData = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
+    const ocrResult = await RealOCREngine.recognizeImage(rasterData);
+
+    expect(ocrResult.runtime).toBe('TESSERACT_WASM_ON_DEVICE');
+    expect(ocrResult.isRealInference).toBe(true);
+  });
+
+  // 5. Receipt parser consumes OCR output (including BEAN & BREW with integer & rupee amounts)
+  it('5. should parse raw OCR text into structured receipt including BEAN & BREW receipt with ₹ / integer values', () => {
     const rawOcr = `
-      METRO SUPERMARKET
-      Organic Almond Milk $4.50
-      Artisan Sourdough $5.25
-      Dark Roast Coffee $12.00
-      Subtotal: $21.75
-      Tax: $1.74
-      Total: $23.49
+      BEAN & BREW
+      Cappuccino 150
+      Veg Sandwich 220
+      Blueberry Muffin 180
+      French Fries 250
+      Mineral Water 80
+      --------------------------------
+      Subtotal: 880
+      CGST: 22
+      SGST: 22
+      --------------------------------
+      Total: 924
     `;
 
     const parsed = ReceiptParser.parse(rawOcr);
-    expect(parsed.merchant).toBe('METRO SUPERMARKET');
-    expect(parsed.items.length).toBe(3);
+    expect(parsed.merchant).toBe('BEAN & BREW');
+    expect(parsed.items.length).toBe(5);
+    expect(parsed.items[0]).toEqual({ name: 'Cappuccino', price: 150 });
+    expect(parsed.items[1]).toEqual({ name: 'Veg Sandwich', price: 220 });
+    expect(parsed.items[2]).toEqual({ name: 'Blueberry Muffin', price: 180 });
+    expect(parsed.items[3]).toEqual({ name: 'French Fries', price: 250 });
+    expect(parsed.items[4]).toEqual({ name: 'Mineral Water', price: 80 });
   });
 
-  // 4. Structured receipt extraction
-  it('4. should extract structured JSON with items, prices, subtotal, and tax', () => {
-    const receiptText = `
-      BLUE BOTTLE COFFEE
-      Single Origin Espresso $4.50
-      Oat Milk Cortado $5.25
-      Almond Croissant $4.75
-      Subtotal: $14.50
-      Tax: $1.16
-      Total: $15.66
+  // 6. Arithmetic consumes parsed values
+  it('6. should dynamically compute real arithmetic: sum(items) -> subtotal -> tax -> total', () => {
+    const rawOcr = `
+      BEAN & BREW
+      Cappuccino 150
+      Veg Sandwich 220
+      Blueberry Muffin 180
+      French Fries 250
+      Mineral Water 80
+      Subtotal: 880
+      CGST: 22
+      SGST: 22
+      Total: 924
     `;
 
-    const structured = ReceiptParser.parse(receiptText);
-    expect(structured.merchant).toBe('BLUE BOTTLE COFFEE');
-    expect(structured.items).toEqual([
-      { name: 'Single Origin Espresso', price: 4.5 },
-      { name: 'Oat Milk Cortado', price: 5.25 },
-      { name: 'Almond Croissant', price: 4.75 }
-    ]);
+    const parsed = ReceiptParser.parse(rawOcr);
+    const sumItems = parsed.items.reduce((s, i) => s + i.price, 0);
+
+    expect(sumItems).toBe(880);
+    expect(parsed.subtotal).toBe(880);
+    // CGST (22) + SGST (22) = 44
+    expect(parsed.tax).toBe(44);
+    expect(parsed.total).toBe(924);
+    expect(parsed.arithmeticVerified).toBe(true);
   });
 
-  // 5. Dynamic arithmetic calculation (sum(items) -> subtotal -> tax -> total)
-  it('5. should dynamically calculate sum(items) -> subtotal -> tax -> total without hardcoding $35.26', () => {
-    const receiptText = `
-      CAMPUS BOOKSTORE
-      Algorithms Textbook $85.00
-      Spiral Notebook $6.50
-      Gel Pens Pack $8.50
-      Subtotal: $100.00
-      Tax: $8.00
-      Total: $108.00
-    `;
+  // 7. Cache miss occurs for first image
+  it('7. should produce a CACHE MISS on first evaluation of Image A in workflow engine', async () => {
+    const engine = WorkflowEngine.getInstance();
+    const financeWorkflow = DEMO_WORKFLOWS[0];
 
-    const calculated = ReceiptParser.parse(receiptText);
-    const itemSum = calculated.items.reduce((acc, i) => acc + i.price, 0);
+    const imagePayloadA = {
+      type: 'IMAGE',
+      image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+      fileName: 'image_a.png',
+      source: 'Real User Uploaded File',
+      isRealUpload: true
+    };
 
-    expect(itemSum).toBeCloseTo(100.0, 2);
-    expect(calculated.subtotal).toBeCloseTo(100.0, 2);
-    expect(calculated.tax).toBeCloseTo(8.0, 2);
-    expect(calculated.total).toBeCloseTo(108.0, 2);
-    // Explicitly verify this is NOT the old fixture
-    expect(calculated.total).not.toBe(35.26);
+    const report = await engine.executeWorkflow(financeWorkflow, imagePayloadA);
+    const ocrRecord = report.nodeRecords['node_bill_ocr'];
+
+    expect(ocrRecord.cacheHit).toBe(false); // First evaluation is genuine MISS
   });
 
-  // 6. Cache Miss
-  it('6. should produce a CACHE MISS on first evaluation of Image A', () => {
-    const cache = IntermediateResultCache.getInstance();
-    const imagePayloadA = { hash: 'img_hash_aaa_111', bytes: 4096 };
-    const cacheKeyA = cache.generateKey('wf-finance', 'node-ocr', imagePayloadA, 'tesseract-v7');
+  // 8. Cache hit occurs for identical image
+  it('8. should produce a genuine CACHE HIT when Image A is evaluated a second time', async () => {
+    const engine = WorkflowEngine.getInstance();
+    const financeWorkflow = DEMO_WORKFLOWS[0];
 
-    const lookup = cache.get(cacheKeyA);
-    expect(lookup).toBeUndefined(); // Genuine MISS
+    const imagePayloadA = {
+      type: 'IMAGE',
+      image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+      fileName: 'image_a.png',
+      source: 'Real User Uploaded File',
+      isRealUpload: true
+    };
+
+    // First execution (populates cache)
+    await engine.executeWorkflow(financeWorkflow, imagePayloadA);
+
+    // Second execution with identical image
+    const secondReport = await engine.executeWorkflow(financeWorkflow, imagePayloadA);
+    const ocrRecord = secondReport.nodeRecords['node_bill_ocr'];
+
+    expect(ocrRecord.cacheHit).toBe(true);
+    expect(secondReport.cacheHitsCount).toBeGreaterThanOrEqual(1);
   });
 
-  // 7. Cache Hit
-  it('7. should produce a genuine CACHE HIT when Image A is evaluated a second time', () => {
-    const cache = IntermediateResultCache.getInstance();
-    const imagePayloadA = { hash: 'img_hash_aaa_111', bytes: 4096 };
-    const cacheKeyA = cache.generateKey('wf-finance', 'node-ocr', imagePayloadA, 'tesseract-v7');
+  // 9. Different image invalidates cache
+  it('9. should produce a CACHE MISS for Image B and not reuse Image A cached result', async () => {
+    const engine = WorkflowEngine.getInstance();
+    const financeWorkflow = DEMO_WORKFLOWS[0];
 
-    // Populate after first run
-    cache.set(cacheKeyA, 'wf-finance', 'node-ocr', 'img_hash_aaa_111', 'tesseract-v7', { text: 'OCR text A' }, 'LOCAL_CPU');
+    const imagePayloadA = {
+      type: 'IMAGE',
+      image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+      fileName: 'image_a.png',
+      source: 'Real User Uploaded File',
+      isRealUpload: true
+    };
 
-    // Second evaluation
-    const lookup = cache.get(cacheKeyA);
-    expect(lookup).toBeDefined();
-    expect(lookup?.outputData.text).toBe('OCR text A');
+    const imagePayloadB = {
+      type: 'IMAGE',
+      image: 'data:image/bmp;base64,Qk1GAAAAAAAAADYAAAAoAAAAAgAAAP7///8BABgAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/AAD/AAAAAP8AAP8AAA==',
+      fileName: 'image_b.bmp',
+      source: 'Real User Uploaded File',
+      isRealUpload: true
+    };
+
+    // Execute Image A
+    await engine.executeWorkflow(financeWorkflow, imagePayloadA);
+
+    // Execute Image B (different pixels)
+    const reportB = await engine.executeWorkflow(financeWorkflow, imagePayloadB);
+    const ocrRecordB = reportB.nodeRecords['node_bill_ocr'];
+
+    expect(ocrRecordB.cacheHit).toBe(false); // Cache miss for distinct image
   });
 
-  // 8. Different input invalidates cache (Image B)
-  it('8. should produce a CACHE MISS for Image B and not reuse Image A cached result', () => {
-    const cache = IntermediateResultCache.getInstance();
-    const imagePayloadA = { hash: 'img_hash_aaa_111', bytes: 4096 };
-    const imagePayloadB = { hash: 'img_hash_bbb_222', bytes: 8192 };
-
-    const keyA = cache.generateKey('wf-finance', 'node-ocr', imagePayloadA, 'tesseract-v7');
-    const keyB = cache.generateKey('wf-finance', 'node-ocr', imagePayloadB, 'tesseract-v7');
-
-    cache.set(keyA, 'wf-finance', 'node-ocr', 'img_hash_aaa_111', 'tesseract-v7', { text: 'OCR text A' }, 'LOCAL_CPU');
-
-    const lookupB = cache.get(keyB);
-    expect(lookupB).toBeUndefined(); // B is a MISS
-    expect(keyA).not.toEqual(keyB);
-  });
-
-  // 9. Expense persistence contract
-  it('9. should persist structured expense with all required audit fields', () => {
+  // 10. Expense persistence contract with parsed values
+  it('10. should persist structured expense with all audit fields and parsed dynamic values', () => {
     const actionLayer = AndroidActionLayer.getInstance();
     const expense = actionLayer.recordExpense({
-      vendor: 'BLUE BOTTLE COFFEE',
+      vendor: 'BEAN & BREW',
       items: [
-        { name: 'Espresso', price: 4.5 },
-        { name: 'Cortado', price: 5.25 }
+        { name: 'Cappuccino', price: 150 },
+        { name: 'Veg Sandwich', price: 220 },
+        { name: 'Blueberry Muffin', price: 180 },
+        { name: 'French Fries', price: 250 },
+        { name: 'Mineral Water', price: 80 }
       ],
-      subtotal: 9.75,
-      tax: 0.78,
-      total: 10.53,
+      subtotal: 880,
+      tax: 44,
+      total: 924,
       category: 'Food & Dining'
     });
 
     expect(expense.id).toBeDefined();
-    expect(expense.vendor).toBe('BLUE BOTTLE COFFEE');
-    expect(expense.items.length).toBe(2);
-    expect(expense.subtotal).toBe(9.75);
-    expect(expense.tax).toBe(0.78);
-    expect(expense.total).toBe(10.53);
+    expect(expense.vendor).toBe('BEAN & BREW');
+    expect(expense.items.length).toBe(5);
+    expect(expense.subtotal).toBe(880);
+    expect(expense.tax).toBe(44);
+    expect(expense.total).toBe(924);
     expect(expense.category).toBe('Food & Dining');
     expect(expense.timestamp).toBeGreaterThan(0);
 
-    // Retrieve from store
     const stored = actionLayer.getExpenses();
     const match = stored.find((e) => e.id === expense.id);
     expect(match).toBeDefined();
-    expect(match?.total).toBe(10.53);
+    expect(match?.total).toBe(924);
   });
 
-  // 10. Full workflow execution through existing engine
-  it('10. should execute complete Finance workflow through WorkflowEngine with dynamic arithmetic', async () => {
+  // 11. Full workflow execution through existing engine with custom text payload
+  it('11. should execute complete Finance workflow through WorkflowEngine with dynamic arithmetic', async () => {
     const engine = WorkflowEngine.getInstance();
-    const financeWorkflow = DEMO_WORKFLOWS[0]; // Bill OCR to Expense Tracker
+    const financeWorkflow = DEMO_WORKFLOWS[0];
 
     const customReceipt = {
       type: 'IMAGE',
@@ -193,7 +257,6 @@ describe('Real Finance Vertical Slice (Phases 4-10, 15)', () => {
     expect(report.status).toBe('COMPLETED');
     expect(report.error).toBeUndefined();
 
-    // Check transform step output
     const transformRecord = report.nodeRecords['node_bill_calc'];
     expect(transformRecord).toBeDefined();
     expect(transformRecord.status).toBe('SUCCESS');
@@ -201,7 +264,6 @@ describe('Real Finance Vertical Slice (Phases 4-10, 15)', () => {
     expect(transformRecord.outputData.subtotal).toBeCloseTo(60.0, 2);
     expect(transformRecord.outputData.total).not.toBe(35.26);
 
-    // Check persistence action
     const actionRecord = report.nodeRecords['node_bill_save'];
     expect(actionRecord).toBeDefined();
     expect(actionRecord.status).toBe('SUCCESS');
