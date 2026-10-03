@@ -8,3 +8,4 @@ export * from './Dialog';
 export * from './Sheet';
 export * from './Tooltip';
 export * from './Nav';
+export * from './PageContainer';

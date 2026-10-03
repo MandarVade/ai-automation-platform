@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { TopBar } from './ui/components/TopBar';
-import { BottomNav, NavTab } from './ui/components/BottomNav';
+import { AppHeader } from './ui/components/AppHeader';
+import { BottomNav } from './ui/components/BottomNav';
 import { DeviceResourceModal } from './ui/components/DeviceResourceModal';
 import { HomeScreen } from './ui/screens/HomeScreen';
-import { CreateScreen } from './ui/screens/CreateScreen';
-import { VisualBuilderScreen } from './ui/screens/VisualBuilderScreen';
+import { StudioScreen } from './ui/screens/StudioScreen';
 import { ExecutionMonitorScreen } from './ui/screens/ExecutionMonitorScreen';
 import { WorkflowDetailScreen } from './ui/screens/WorkflowDetailScreen';
 import { ModelRegistryScreen } from './ui/screens/ModelRegistryScreen';
@@ -13,6 +13,8 @@ import { SettingsScreen } from './ui/screens/SettingsScreen';
 import { DeviceContextManager } from './core/resources/device-context';
 import { Workflow } from './types/workflow';
 import { DEMO_WORKFLOWS } from './data/templates';
+import { NavTab } from './ui/navigation/nav-config';
+import { PageContainer, PageHeader } from './ui/components/ui';
 
 export const App: React.FC = () => {
   const [currentTab, setCurrentTab] = useState<NavTab>('home');
@@ -21,6 +23,7 @@ export const App: React.FC = () => {
   const [selectedWorkflowDetail, setSelectedWorkflowDetail] = useState<Workflow | null>(null);
   const [isDeviceModalOpen, setIsDeviceModalOpen] = useState(false);
   const [initialNLPrompt, setInitialNLPrompt] = useState<string>('');
+  const [studioSubView, setStudioSubView] = useState<'create' | 'builder'>('builder');
 
   const device = DeviceContextManager.getInstance().getContext();
 
@@ -36,74 +39,99 @@ export const App: React.FC = () => {
 
   const handleStartNLPlan = (prompt: string) => {
     setInitialNLPrompt(prompt);
-    setCurrentTab('create');
+    setStudioSubView('create');
+    setCurrentTab('studio');
   };
 
   const handleEditInVisualBuilder = (wf: Workflow) => {
     setActiveWorkflow(wf);
     setSelectedWorkflowDetail(null);
-    setCurrentTab('builder');
+    setStudioSubView('builder');
+    setCurrentTab('studio');
+  };
+
+  const handleTabChange = (tab: NavTab) => {
+    setIsExecuting(false);
+    setSelectedWorkflowDetail(null);
+    if (tab === 'create') {
+      setStudioSubView('create');
+      setCurrentTab('studio');
+    } else if (tab === 'builder') {
+      setStudioSubView('builder');
+      setCurrentTab('studio');
+    } else {
+      setCurrentTab(tab);
+    }
   };
 
   return (
     <div className="app-container">
-      {/* System Bar & Single Notification Controllable Action */}
+      {/* Top System Bar & Notification Controller */}
       <TopBar
         onOpenDeviceSettings={() => setIsDeviceModalOpen(true)}
         onNavigateToExecution={() => setIsExecuting(true)}
       />
 
+      {/* EL-06 Primary Desktop/Mobile Header */}
+      <AppHeader
+        currentTab={currentTab}
+        onTabChange={handleTabChange}
+        onOpenDeviceSettings={() => setIsDeviceModalOpen(true)}
+        deviceModel={device.deviceModel}
+      />
+
       {/* Main Screen Content */}
       <main className="main-content">
         {isExecuting ? (
-          <ExecutionMonitorScreen
-            workflow={activeWorkflow}
-            onBackToBuilder={() => setIsExecuting(false)}
-          />
+          <PageContainer width="wide">
+            <ExecutionMonitorScreen
+              workflow={activeWorkflow}
+              onBackToBuilder={() => setIsExecuting(false)}
+            />
+          </PageContainer>
         ) : selectedWorkflowDetail ? (
-          <WorkflowDetailScreen
-            workflow={selectedWorkflowDetail}
-            onBack={() => setSelectedWorkflowDetail(null)}
-            onEdit={handleEditInVisualBuilder}
-            onRun={handleRunWorkflow}
-          />
+          <PageContainer width="wide">
+            <WorkflowDetailScreen
+              workflow={selectedWorkflowDetail}
+              onBack={() => setSelectedWorkflowDetail(null)}
+              onEdit={handleEditInVisualBuilder}
+              onRun={handleRunWorkflow}
+            />
+          </PageContainer>
         ) : (
           <>
             {currentTab === 'home' && (
-              <HomeScreen
-                device={device}
-                onSelectWorkflow={handleSelectWorkflow}
-                onRunWorkflow={handleRunWorkflow}
-                onStartNLPlan={handleStartNLPlan}
-                onOpenVisualBuilder={() => setCurrentTab('builder')}
-              />
+              <PageContainer width="default">
+                <HomeScreen
+                  device={device}
+                  onSelectWorkflow={handleSelectWorkflow}
+                  onRunWorkflow={handleRunWorkflow}
+                  onStartNLPlan={handleStartNLPlan}
+                  onOpenVisualBuilder={() => {
+                    setStudioSubView('builder');
+                    setCurrentTab('studio');
+                  }}
+                />
+              </PageContainer>
             )}
 
-            {currentTab === 'create' && (
-              <CreateScreen
-                initialPrompt={initialNLPrompt || undefined}
-                onRunWorkflow={handleRunWorkflow}
-                onEditInVisualBuilder={handleEditInVisualBuilder}
-              />
-            )}
-
-            {currentTab === 'builder' && (
-              <VisualBuilderScreen
-                initialWorkflow={activeWorkflow}
-                onRunWorkflow={handleRunWorkflow}
-              />
+            {(currentTab === 'studio' || currentTab === 'create' || currentTab === 'builder') && (
+              <PageContainer width="wide">
+                <StudioScreen
+                  initialPrompt={initialNLPrompt || undefined}
+                  initialWorkflow={activeWorkflow}
+                  onRunWorkflow={handleRunWorkflow}
+                  activeSubView={studioSubView}
+                />
+              </PageContainer>
             )}
 
             {currentTab === 'workflows' && (
-              <div>
-                <div className="section-header">
-                  <div>
-                    <h2 style={{ fontSize: '18px', fontWeight: 600 }}>Workflow Library</h2>
-                    <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-                      Pre-configured and user-defined multi-step AI automations.
-                    </p>
-                  </div>
-                </div>
+              <PageContainer width="wide">
+                <PageHeader
+                  title="Workflow Library"
+                  description="Pre-configured and user-defined multi-step AI automations."
+                />
 
                 <div className="card-grid">
                   {DEMO_WORKFLOWS.map((wf) => (
@@ -130,26 +158,34 @@ export const App: React.FC = () => {
                     </div>
                   ))}
                 </div>
-              </div>
+              </PageContainer>
             )}
 
-            {currentTab === 'models' && <ModelRegistryScreen />}
+            {currentTab === 'models' && (
+              <PageContainer width="wide">
+                <ModelRegistryScreen />
+              </PageContainer>
+            )}
 
-            {currentTab === 'activity' && <ActivityScreen />}
+            {currentTab === 'activity' && (
+              <PageContainer width="wide">
+                <ActivityScreen />
+              </PageContainer>
+            )}
 
-            {currentTab === 'settings' && <SettingsScreen />}
+            {currentTab === 'settings' && (
+              <PageContainer width="default">
+                <SettingsScreen />
+              </PageContainer>
+            )}
           </>
         )}
       </main>
 
-      {/* Android System Bottom Navigation */}
+      {/* Android System Bottom Navigation (4-Item Primary) */}
       <BottomNav
         currentTab={currentTab}
-        onTabChange={(tab) => {
-          setIsExecuting(false);
-          setSelectedWorkflowDetail(null);
-          setCurrentTab(tab);
-        }}
+        onTabChange={handleTabChange}
       />
 
       {/* Device Resource Context Simulator Modal */}

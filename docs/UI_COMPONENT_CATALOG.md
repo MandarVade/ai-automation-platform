@@ -287,3 +287,49 @@ import { Home, Workflow, Activity, Settings } from 'lucide-react';
   <NavItem icon={Settings} label="Settings" onClick={() => navigate('settings')} />
 </NavGroup>
 ```
+
+---
+
+## 11. PageContainer & PageHeader (`PageContainer.tsx`)
+
+**Purpose:**
+Standardizes horizontal layout padding, max content widths, vertical rhythm, and screen headings across all routes.
+
+**Widths:**
+- `compact`: `680px` (focused forms and wizards)
+- `default`: `960px` (standard dashboard / home screens)
+- `wide`: `1280px` (workflow library, visual canvas, telemetry monitors)
+- `full`: `100%` (specialized edge-to-edge views)
+
+**Usage:**
+```tsx
+import { PageContainer, PageHeader } from './components/ui';
+
+<PageContainer width="wide">
+  <PageHeader
+    title="Workflow Library"
+    description="Pre-configured and user-defined multi-step AI automations."
+    actions={<Button variant="primary" size="sm">Create Workflow</Button>}
+  />
+  <div className="content">...</div>
+</PageContainer>
+```
+
+---
+
+## 12. Application Shell & Navigation Architecture (Phase 2)
+
+**Primary Navigation (4 Destinations):**
+- **Home**: Dashboard and quick natural language intent initiation.
+- **Studio**: Transitional unified workspace combining Visual DAG Builder and Natural Language Planner (with mode switcher until Phase 4).
+- **Workflows**: Multi-step automations library and templates.
+- **Activity**: Live and historical execution audits, token consumption, and latency telemetry.
+
+**Secondary Navigation (System & Platform):**
+- **Models**: On-device (Gemini Nano, NPU TFLite) and cloud model registry.
+- **Settings**: Device execution quota, fallback policies, and runtime logs.
+
+**Responsive Shell Behavior:**
+- **Desktop (≥901px)**: Primary navigation in top sticky header (`AppHeader`), secondary links adjacent to simulation action, no bottom bar.
+- **Mobile (≤900px)**: 4-item primary bottom navigation bar (`BottomNav`), secondary navigation accessible through responsive slide-over sheet drawer (`Menu` button in header).
+
