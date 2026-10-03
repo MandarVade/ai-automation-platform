@@ -125,6 +125,15 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({
     handleWorkflowChange(updatedWorkflow);
   };
 
+  const handleUpdateModel = (modelId: string | undefined) => {
+    if (!selectedNodeId) return;
+    const updatedNodes = workflow.nodes.map((n) =>
+      n.id === selectedNodeId ? { ...n, assignedModelId: modelId } : n
+    );
+    const updatedWorkflow = { ...workflow, nodes: updatedNodes, updatedAt: Date.now() };
+    handleWorkflowChange(updatedWorkflow);
+  };
+
   const handleUpdateLabel = (label: string) => {
     if (!selectedNodeId) return;
     const updatedNodes = workflow.nodes.map((n) =>
@@ -281,6 +290,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({
             node={selectedNode}
             onUpdatePolicy={handleUpdatePolicy}
             onUpdateLabel={handleUpdateLabel}
+            onUpdateModel={handleUpdateModel}
             onDeleteNode={handleDeleteNode}
             onDuplicateNode={handleDuplicateNode}
           />
@@ -298,6 +308,7 @@ export const StudioScreen: React.FC<StudioScreenProps> = ({
           node={selectedNode}
           onUpdatePolicy={handleUpdatePolicy}
           onUpdateLabel={handleUpdateLabel}
+          onUpdateModel={handleUpdateModel}
           onDeleteNode={handleDeleteNode}
           onDuplicateNode={handleDuplicateNode}
           onClose={() => setMobileInspectorOpen(false)}

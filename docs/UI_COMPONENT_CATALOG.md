@@ -347,3 +347,38 @@ Studio is the central workflow-authoring environment unifying Natural Language i
 - `AddNodeDialog`: Accessible modal allowing users to search and add supported triggers (`CAMERA_CAPTURE`, `AUDIO_RECORD`, `MANUAL`), AI capabilities (`OCR`, `SPEECH_TO_TEXT`, `SUMMARIZATION`, `CONCEPT_EXTRACTION`, `QUESTION_GENERATION`, `PLANT_DISEASE_DIAGNOSIS`), transforms (`CALCULATE_TOTAL`, `STRUCTURED_JSON_MAP`), and Android actions (`EXPENSE_TRACKER_STORE`, `NOTIFICATION_EMIT`, `SAVE_FILE`).
 - `StudioPromptPanel`: Integrated natural-language generator that calls `NLWorkflowPlanner.planFromPrompt` and synchronizes the resulting workflow directly with the canvas.
 
+---
+
+## 14. Workflow Node System & Inspector (Phase 5)
+
+Phase 5 formalizes ONE reusable, consistent workflow node architecture that every current and future workflow node uses, eliminating bespoke, per-capability node markup.
+
+### Core Architectural Primitives
+
+- **`WorkflowNodeShell` (`WorkflowNodeShell.tsx`)**:
+  - Unified shell component rendering all node types across triggers, AI capabilities, data transforms, and Android actions.
+  - Structure:
+    - **Header**: Standard Lucide capability icon, category badge, execution policy badge (`AUTO`, `LOCAL`, `CLOUD`, `BATTERY`).
+    - **Body**: Node display label, optional semantic status indicator (`RUNNING`, `SUCCESS`, `FAILED`, `FALLBACK`), concise transformation dataflow string (`Image → Extracted Text`).
+    - **Footer**: Output data type badge, resolved model delegate ID (or edge execution location).
+    - **Handles**: Standardized target handle (top, only if `inputTypes.length > 0`) and source handle (bottom) with ARIA accessibility labels.
+  - Sizing & Styling: 220px standard width, 10px radius (`--radius-md`), Obsidian surface (`--color-surface`), subtle border (`--color-border`), burnt-orange accent outline (`#D97752`) when selected. Zero gradients, glow, or colorful category backgrounds.
+
+- **`node-presentation-registry.tsx`**:
+  - Centralized presentation metadata registry mapping all 25+ domain capabilities to standard Lucide icons, human-readable category badges, and dataflow transformation strings.
+  - Never mutates domain logic; acts strictly as an authoritative UI projection layer.
+
+- **`WorkflowCanvasNode.tsx`**:
+  - Lightweight React Flow memoized wrapper that directly delegates all visual and interaction rendering to `WorkflowNodeShell`.
+
+- **Enhanced `NodeInspector` (`NodeInspector.tsx`)**:
+  - Unified, multi-section configuration panel for selected nodes on desktop (fixed 320px right aside) and mobile (bottom slide-over `Sheet`).
+  - **Identity**: Capability icon, category, display title, dataflow description, underlying engine name.
+  - **Configuration**: Editable display label input with immediate graph synchronization.
+  - **Execution Policy**: Direct control over `AUTO`, `FORCE_LOCAL`, `FORCE_CLOUD`, and `BATTERY_CONSERVE`.
+  - **Model Delegate Selection**: Queries `ModelRegistry.getByCapability(node.capability)` to present valid model choices or `AUTO`. Calls `ModelSelector.selectBestModel` to present explainable routing rationale (reasons and scores).
+  - **Resource Profile**: Surfaces real hardware telemetry (RAM requirement, expected latency ms, battery impact, model quantization, package size, delegate targets). For non-ML nodes, displays native Android OS IPC/service metrics.
+  - **Data Contracts (I/O)**: Shows input type badges and output type badge.
+  - **Dependencies**: Lists upstream predecessor node IDs.
+  - **Actions**: Accessible buttons for duplicating or deleting the active node.
+
