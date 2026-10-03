@@ -7,6 +7,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   variant?: ButtonVariant;
   size?: ButtonSize;
   isLoading?: boolean;
+  loading?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
 }
@@ -17,6 +18,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       variant = 'secondary',
       size = 'md',
       isLoading = false,
+      loading,
       leftIcon,
       rightIcon,
       disabled,
@@ -26,26 +28,27 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
+    const isSpinnerActive = loading !== undefined ? loading : isLoading;
     const baseClass = 'el-btn';
-    const variantClass = `el-btn-${variant}`;
-    const sizeClass = `el-btn-${size}`;
-    const loadingClass = isLoading ? 'el-btn-loading' : '';
+    const variantClass = `el-btn--${variant}`;
+    const sizeClass = `el-btn--${size}`;
+    const loadingClass = isSpinnerActive ? 'el-btn--loading' : '';
 
     return (
       <button
         ref={ref}
-        disabled={disabled || isLoading}
+        disabled={disabled || isSpinnerActive}
         className={`${baseClass} ${variantClass} ${sizeClass} ${loadingClass} ${className}`.trim()}
-        aria-busy={isLoading}
+        aria-busy={isSpinnerActive}
         {...props}
       >
-        {isLoading ? (
-          <span className="el-btn-spinner" aria-hidden="true" />
+        {isSpinnerActive ? (
+          <span className="el-btn__spinner" aria-hidden="true" />
         ) : (
           leftIcon && <span className="el-btn-icon el-btn-icon-left">{leftIcon}</span>
         )}
         <span className="el-btn-text">{children}</span>
-        {!isLoading && rightIcon && (
+        {!isSpinnerActive && rightIcon && (
           <span className="el-btn-icon el-btn-icon-right">{rightIcon}</span>
         )}
       </button>
@@ -54,3 +57,4 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 );
 
 Button.displayName = 'Button';
+

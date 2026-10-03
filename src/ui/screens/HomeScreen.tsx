@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { Workflow } from '../../types/workflow';
 import { DeviceContext } from '../../types/device';
 import { DEMO_WORKFLOWS } from '../../data/templates';
+import { Button, Card, CardHeader, CardTitle, CardDescription, Textarea, Badge } from '../components/ui';
+import { ArrowRight, Sparkles, Shield, Cpu, Eye, Workflow as WorkflowIcon } from 'lucide-react';
+import { motion } from 'motion/react';
 
 interface HomeScreenProps {
   device: DeviceContext;
@@ -11,168 +14,306 @@ interface HomeScreenProps {
   onOpenVisualBuilder: () => void;
 }
 
+interface ExamplePrompt {
+  id: string;
+  title: string;
+  category: string;
+  prompt: string;
+  nodeCount: number;
+}
+
+const EXAMPLE_PROMPTS: ExamplePrompt[] = [
+  {
+    id: 'receipt',
+    title: 'Bill & Expense Extraction',
+    category: 'Finance',
+    prompt: 'Take a photo of my bill, extract items and prices, calculate total and categorize the expense.',
+    nodeCount: 3,
+  },
+  {
+    id: 'study',
+    title: 'Lecture Transcription & Study Quiz',
+    category: 'Education',
+    prompt: 'Record my lecture, transcribe it, summarize important concepts and generate 5 quiz questions.',
+    nodeCount: 4,
+  },
+  {
+    id: 'botany',
+    title: 'Plant Disease Diagnosis & Care',
+    category: 'Vision',
+    prompt: 'Take a photo of a plant, identify the disease, explain symptoms and create a botanical care plan.',
+    nodeCount: 3,
+  },
+];
+
 export const HomeScreen: React.FC<HomeScreenProps> = ({
   device,
   onSelectWorkflow,
   onRunWorkflow,
   onStartNLPlan,
-  onOpenVisualBuilder
+  onOpenVisualBuilder,
 }) => {
   const [prompt, setPrompt] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleGenerate = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (prompt.trim()) {
-      onStartNLPlan(prompt.trim());
+    if (!prompt.trim()) {
+      setError('Please describe an automation task before submitting.');
+      return;
     }
+    setError(null);
+    setIsSubmitting(true);
+    onStartNLPlan(prompt.trim());
   };
 
-  const samplePrompts = [
-    'Take a photo of my bill, extract items and prices, calculate total and categorize the expense.',
-    'Record my lecture, transcribe it, summarize important concepts and generate 5 quiz questions.',
-    'Take a photo of a plant, identify the disease, explain symptoms and create a botanical care plan.'
-  ];
+  const handleSelectExample = (examplePrompt: string) => {
+    setPrompt(examplePrompt);
+    setError(null);
+  };
 
   return (
-    <div>
-      {/* Hero Intent Creation Box */}
-      <section className="hero-box">
-        <h2>What do you want to automate?</h2>
-        <p>Describe your multi-step AI automation in plain English. The platform determines models, routing, and device orchestration.</p>
+    <div className="el-home">
+      {/* 1. Hero Section */}
+      <motion.section
+        className="el-home__hero"
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: 'easeOut' }}
+      >
+        <div className="el-home__context-badge">
+          <Badge variant="accent" size="sm">
+            EL-06 • Autonomous Edge Orchestrator
+          </Badge>
+        </div>
 
-        <form onSubmit={handleGenerate}>
-          <div className="nl-input-wrapper">
-            <input
-              type="text"
-              className="nl-input"
-              placeholder="e.g., Take a photo of my bill, extract total and add to expense tracker..."
+        <h1 className="el-home__headline">
+          Build an automation
+          <br />
+          that actually runs.
+        </h1>
+
+        <p className="el-home__subheadline">
+          Describe your task in plain language. The platform resolves the directed acyclic graph,
+          selects optimal on-device or cloud models, and executes deterministically.
+        </p>
+      </motion.section>
+
+      {/* 2. Natural-Language Creation Input Card */}
+      <motion.section
+        className="el-home__input-section"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.08, ease: 'easeOut' }}
+      >
+        <form onSubmit={handleSubmit} className="el-home__form">
+          <div className="el-home__input-box">
+            <Textarea
+              id="nl-automation-prompt"
+              label="Describe what you want to automate"
+              placeholder="e.g., Take a photo of my grocery bill, extract line items via OCR, calculate subtotal with tax, and store structured record..."
               value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
+              onChange={(e) => {
+                setPrompt(e.target.value);
+                if (error) setError(null);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSubmit(e);
+                }
+              }}
+              rows={3}
+              error={error || undefined}
+              disabled={isSubmitting}
             />
-            <button type="submit" className="btn-generate">
-              <span>✦</span> Plan Workflow
-            </button>
+
+            <div className="el-home__input-actions">
+              <div className="el-home__input-hint">
+                <span>Press Enter to plan or tap Create Workflow</span>
+              </div>
+
+              <div className="el-home__btn-group">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={onOpenVisualBuilder}
+                  title="Open blank visual DAG canvas in Studio"
+                >
+                  <WorkflowIcon size={14} />
+                  <span>Open Blank Canvas</span>
+                </Button>
+
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="md"
+                  loading={isSubmitting}
+                  rightIcon={<ArrowRight size={15} />}
+                >
+                  Create Workflow
+                </Button>
+              </div>
+            </div>
           </div>
         </form>
+      </motion.section>
 
-        {/* Quick Suggestion Chips */}
-        <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-          <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>PS EXAMPLES:</span>
-          {samplePrompts.map((p, idx) => (
-            <button
-              key={idx}
-              className="btn-secondary"
-              style={{ fontSize: '11px', padding: '3px 8px', borderRadius: '4px' }}
-              onClick={() => onStartNLPlan(p)}
+      {/* 3. Actionable Examples */}
+      <motion.section
+        className="el-home__examples-section"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, delay: 0.16, ease: 'easeOut' }}
+      >
+        <div className="el-home__section-label">
+          <span>Example Automations</span>
+          <span className="el-home__section-sublabel">Select a template to populate the creation prompt</span>
+        </div>
+
+        <div className="el-home__examples-grid">
+          {EXAMPLE_PROMPTS.map((ex) => (
+            <Card
+              key={ex.id}
+              interactive
+              className={`el-home__example-card ${prompt === ex.prompt ? 'el-card--selected' : ''}`}
+              onClick={() => handleSelectExample(ex.prompt)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  handleSelectExample(ex.prompt);
+                }
+              }}
             >
-              {idx === 0 ? '🧾 Bill & Expense' : idx === 1 ? '🎓 Lecture Notes & Quiz' : '🌿 Plant Care'}
-            </button>
+              <CardHeader>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Badge variant="neutral" size="sm">
+                    {ex.category}
+                  </Badge>
+                  <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--color-text-muted)' }}>
+                    {ex.nodeCount} nodes
+                  </span>
+                </div>
+                <CardTitle style={{ marginTop: '6px' }}>{ex.title}</CardTitle>
+                <CardDescription style={{ fontSize: '12px', marginTop: '4px' }}>
+                  {ex.prompt}
+                </CardDescription>
+              </CardHeader>
+            </Card>
           ))}
-          <button
-            className="btn-secondary"
-            style={{ fontSize: '11px', padding: '3px 8px', color: 'var(--accent-cyan)' }}
-            onClick={onOpenVisualBuilder}
-          >
-            + Open Blank Visual Canvas
-          </button>
         </div>
-      </section>
+      </motion.section>
 
-      {/* Device AI Readiness Card */}
-      <section style={{ marginBottom: '24px' }}>
-        <div
-          style={{
-            background: 'var(--bg-surface-1)',
-            border: '1px solid var(--border-default)',
-            borderRadius: '8px',
-            padding: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '16px'
-          }}
-        >
-          <div>
-            <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
-              DEVICE AI EXECUTION RUNTIME
-            </div>
-            <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)', marginTop: '2px' }}>
-              {device.deviceModel}
-            </div>
-            <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px' }}>
-              Android {device.androidVersion} | {device.cpuCores} Cores | {device.hasNpu ? 'NNAPI NPU Delegate Active' : 'CPU Delegate'}
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', gap: '16px' }}>
-            <div className="stat-item">
-              <span className="stat-label">RAM Headroom</span>
-              <span className="stat-value" style={{ color: device.availableRamMb < 1500 ? 'var(--status-warning)' : 'var(--accent-cyan)' }}>
-                {device.availableRamMb} MB
-              </span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">Battery Level</span>
-              <span className="stat-value">{device.batteryPercentage}%</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">Cloud Routing</span>
-              <span className="stat-value" style={{ color: device.allowCloudInference ? 'var(--status-success)' : 'var(--text-muted)' }}>
-                {device.allowCloudInference ? 'PERMITTED' : 'OFFLINE ONLY'}
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Primary Problem Statement Workflows */}
-      <section>
-        <div className="section-header">
-          <div className="section-title">
-            <span>Verified AI Automation Pipelines</span>
-            <span className="badge-count">{DEMO_WORKFLOWS.length} Built-in</span>
-          </div>
+      {/* 4. Pre-built Verified Pipelines (Existing Workflows) */}
+      <motion.section
+        className="el-home__verified-section"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.22, ease: 'easeOut' }}
+      >
+        <div className="el-home__section-label">
+          <span>Built-in Production Pipelines</span>
+          <span className="el-home__section-sublabel">Pre-validated DAGs ready for immediate execution</span>
         </div>
 
-        <div className="card-grid">
+        <div className="el-home__verified-grid">
           {DEMO_WORKFLOWS.map((wf) => (
-            <div key={wf.id} className="workflow-card">
-              <div>
-                <div className="card-top">
-                  <span className={`card-domain-badge ${wf.domain}`}>{wf.domain}</span>
-                  <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
+            <Card key={wf.id} className="el-home__verified-card">
+              <div className="el-home__verified-card-top">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Badge variant="accent" size="sm">{wf.domain}</Badge>
+                  <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--color-text-muted)' }}>
                     v{wf.version}
                   </span>
                 </div>
-
-                <div className="card-name">{wf.name}</div>
-                <div className="card-desc">{wf.description}</div>
+                <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--color-text-muted)' }}>
+                  {wf.nodes.length} steps
+                </span>
               </div>
 
-              <div>
-                <div className="card-pipeline-preview">
-                  {wf.nodes.map((node, i) => (
-                    <React.Fragment key={node.id}>
-                      <span className="node-chip">{node.label}</span>
-                      {i < wf.nodes.length - 1 && <span>→</span>}
-                    </React.Fragment>
-                  ))}
-                </div>
-
-                <div className="card-actions">
-                  <button className="btn-secondary" onClick={() => onSelectWorkflow(wf)}>
-                    Inspect DAG
-                  </button>
-                  <button className="btn-primary" onClick={() => onRunWorkflow(wf)}>
-                    ▶ Execute Pipeline
-                  </button>
-                </div>
+              <div style={{ margin: '8px 0' }}>
+                <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                  {wf.name}
+                </h3>
+                <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '2px', lineHeight: 1.4 }}>
+                  {wf.description}
+                </p>
               </div>
-            </div>
+
+              <div className="el-home__pipeline-chain">
+                {wf.nodes.map((node, i) => (
+                  <React.Fragment key={node.id}>
+                    <span className="el-home__chain-chip">{node.label}</span>
+                    {i < wf.nodes.length - 1 && (
+                      <span className="el-home__chain-arrow">→</span>
+                    )}
+                  </React.Fragment>
+                ))}
+              </div>
+
+              <div className="el-home__verified-actions">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => onSelectWorkflow(wf)}
+                >
+                  Inspect DAG
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => onRunWorkflow(wf)}
+                >
+                  Execute
+                </Button>
+              </div>
+            </Card>
           ))}
         </div>
-      </section>
+      </motion.section>
+
+      {/* 5. Supporting Capability / Trust Architecture */}
+      <motion.section
+        className="el-home__trust-section"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.55, delay: 0.28, ease: 'easeOut' }}
+      >
+        <div className="el-home__trust-grid">
+          <div className="el-home__trust-item">
+            <Cpu size={16} className="el-home__trust-icon" />
+            <div>
+              <div className="el-home__trust-title">Edge-Native Inference</div>
+              <div className="el-home__trust-desc">
+                Executes locally via Gemini Nano and NNAPI NPU delegates with zero network roundtrip.
+              </div>
+            </div>
+          </div>
+
+          <div className="el-home__trust-item">
+            <Shield size={16} className="el-home__trust-icon" />
+            <div>
+              <div className="el-home__trust-title">Thermal & Battery Safeguards</div>
+              <div className="el-home__trust-desc">
+                Continuous hardware governor downgrades complex operations before thermal throttling occurs.
+              </div>
+            </div>
+          </div>
+
+          <div className="el-home__trust-item">
+            <Eye size={16} className="el-home__trust-icon" />
+            <div>
+              <div className="el-home__trust-title">Transparent Explainability</div>
+              <div className="el-home__trust-desc">
+                Every node transition is inspectable with multi-factor model selection score matrices.
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.section>
     </div>
   );
 };

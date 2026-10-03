@@ -5,12 +5,14 @@ export type CardVariant = 'default' | 'interactive' | 'selected' | 'elevated';
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: CardVariant;
   isInteractive?: boolean;
+  interactive?: boolean;
 }
 
 export const Card = forwardRef<HTMLDivElement, CardProps>(
-  ({ variant = 'default', isInteractive = false, className = '', children, ...props }, ref) => {
-    const variantClass = `el-card-${variant}`;
-    const interactiveClass = isInteractive ? 'el-card-interactive' : '';
+  ({ variant = 'default', isInteractive = false, interactive = false, className = '', children, ...props }, ref) => {
+    const hasInteractive = isInteractive || interactive;
+    const variantClass = variant !== 'default' ? `el-card--${variant}` : '';
+    const interactiveClass = hasInteractive ? 'el-card--interactive' : '';
 
     return (
       <div
