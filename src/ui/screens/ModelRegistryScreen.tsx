@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
 import { ModelRegistry } from '../../core/model/registry';
-import { ModelSpec } from '../../types/model';
-import { Button } from '../components/Button';
-import { Badge } from '../components/Badge';
-import { StatusPill } from '../components/StatusPill';
-import { Search, Cpu, Cloud, CheckCircle2, Sliders, Info, Zap } from 'lucide-react';
+import { ModelSpec, ModelCapability } from '../../types/model';
 
 export const ModelRegistryScreen: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -41,175 +37,159 @@ export const ModelRegistryScreen: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
-      {/* 1. Top Header Specification */}
-      <section className="border-3 border-black bg-white shadow-[4px_4px_0px_#000] p-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-black uppercase text-black">
-                ON-DEVICE & CLOUD MODEL REGISTRY
-              </span>
-              <Badge variant="cyber" className="text-[10px]">
-                5 ACTIVE TIERS
-              </Badge>
-            </div>
-            <h1 className="text-xl sm:text-2xl font-black font-mono tracking-tight text-black uppercase mt-1">
-              AI MODEL REGISTRY & HARDWARE PROFILES
-            </h1>
-            <p className="text-xs font-mono text-zinc-600 mt-0.5">
-              Curated on-device NPU/CPU and cloud AI model specifications, quantization tiers, and execution delegates.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <StatusPill label="REAL: TESSERACT WASM" status="real" />
-            <StatusPill label="METADATA: TFLITE / CLOUD" status="metadata" />
-          </div>
+    <div>
+      <div className="section-header">
+        <div>
+          <h2 style={{ fontSize: '18px', fontWeight: 600 }}>Model Registry & Discovery Abstraction</h2>
+          <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+            Curated on-device and cloud AI model specifications, quantization tiers, and hardware delegates.
+          </p>
         </div>
-      </section>
+      </div>
 
-      {/* 2. Filters & Discovery Bar */}
-      <section className="border-2 border-black bg-white shadow-[4px_4px_0px_#000] p-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="relative flex-1 min-w-[220px]">
-            <input
-              type="text"
-              className="w-full pl-9 pr-3 py-1.5 bg-white border-2 border-black font-mono text-xs font-bold text-black shadow-[2px_2px_0px_#000] outline-none"
-              placeholder="Search models by name or keyword..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <Search className="w-4 h-4 text-zinc-500 absolute left-2.5 top-2.5" />
-          </div>
+      {/* Filters Bar */}
+      <div
+        style={{
+          background: 'var(--bg-surface-1)',
+          border: '1px solid var(--border-default)',
+          borderRadius: '8px',
+          padding: '14px 18px',
+          marginBottom: '20px',
+          display: 'flex',
+          gap: '12px',
+          flexWrap: 'wrap',
+          alignItems: 'center'
+        }}
+      >
+        <input
+          type="text"
+          className="nl-input"
+          style={{ maxWidth: '280px', padding: '8px 12px', fontSize: '13px' }}
+          placeholder="Search models by name or keyword..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
 
-          <select
-            value={selectedCap}
-            onChange={(e) => setSelectedCap(e.target.value)}
-            className="px-3 py-1.5 bg-white border-2 border-black font-mono text-xs font-bold text-black shadow-[2px_2px_0px_#000] outline-none cursor-pointer"
+        <select
+          value={selectedCap}
+          onChange={(e) => setSelectedCap(e.target.value)}
+          style={{
+            padding: '8px 12px',
+            background: 'var(--bg-app)',
+            border: '1px solid var(--border-default)',
+            borderRadius: '4px',
+            color: 'var(--text-primary)',
+            fontSize: '13px'
+          }}
+        >
+          {capabilities.map((c) => (
+            <option key={c} value={c}>
+              Capability: {c}
+            </option>
+          ))}
+        </select>
+
+        <div style={{ display: 'flex', gap: '6px' }}>
+          <button
+            className={`btn-secondary ${filterType === 'ALL' ? 'active' : ''}`}
+            style={{ fontSize: '12px', padding: '6px 12px' }}
+            onClick={() => setFilterType('ALL')}
           >
-            {capabilities.map((c) => (
-              <option key={c} value={c}>
-                Capability: {c}
-              </option>
-            ))}
-          </select>
-
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <button
-              type="button"
-              className={`px-3 py-1.5 text-xs font-mono font-bold border-2 border-black transition-all cursor-pointer ${
-                filterType === 'ALL'
-                  ? 'bg-black text-amber-300 shadow-[2px_2px_0px_#FACC15]'
-                  : 'bg-white text-black hover:bg-zinc-100 shadow-[2px_2px_0px_#000]'
-              }`}
-              onClick={() => setFilterType('ALL')}
-            >
-              All Models ({allModels.length})
-            </button>
-            <button
-              type="button"
-              className={`px-3 py-1.5 text-xs font-mono font-bold border-2 border-black transition-all cursor-pointer ${
-                filterType === 'LOCAL'
-                  ? 'bg-black text-cyan-300 shadow-[2px_2px_0px_#00F0FF]'
-                  : 'bg-white text-black hover:bg-zinc-100 shadow-[2px_2px_0px_#000]'
-              }`}
-              onClick={() => setFilterType('LOCAL')}
-            >
-              On-Device Only
-            </button>
-            <button
-              type="button"
-              className={`px-3 py-1.5 text-xs font-mono font-bold border-2 border-black transition-all cursor-pointer ${
-                filterType === 'CLOUD'
-                  ? 'bg-black text-purple-300 shadow-[2px_2px_0px_#C084FC]'
-                  : 'bg-white text-black hover:bg-zinc-100 shadow-[2px_2px_0px_#000]'
-              }`}
-              onClick={() => setFilterType('CLOUD')}
-            >
-              Cloud Only
-            </button>
-          </div>
+            All Models ({allModels.length})
+          </button>
+          <button
+            className={`btn-secondary ${filterType === 'LOCAL' ? 'active' : ''}`}
+            style={{ fontSize: '12px', padding: '6px 12px' }}
+            onClick={() => setFilterType('LOCAL')}
+          >
+            On-Device Only
+          </button>
+          <button
+            className={`btn-secondary ${filterType === 'CLOUD' ? 'active' : ''}`}
+            style={{ fontSize: '12px', padding: '6px 12px' }}
+            onClick={() => setFilterType('CLOUD')}
+          >
+            Cloud Only
+          </button>
         </div>
-      </section>
+      </div>
 
-      {/* 3. Models Grid */}
+      {/* Models Grid */}
       <div className="card-grid">
-        {filtered.map((model) => {
-          const isRealRuntime = model.id === 'model_tesseract_wasm' || model.name.includes('Tesseract');
+        {filtered.map((model) => (
+          <div key={model.id} className="workflow-card">
+            <div>
+              <div className="card-top">
+                <span
+                  className="status-pill"
+                  style={{
+                    fontSize: '10px',
+                    color: model.isLocalAvailable ? 'var(--accent-cyan)' : '#c084fc',
+                    border: '1px solid var(--border-default)'
+                  }}
+                >
+                  {model.isLocalAvailable ? 'ON-DEVICE' : 'CLOUD ENDPOINT'}
+                </span>
+                <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
+                  {model.quantization}
+                </span>
+              </div>
 
-          return (
-            <div key={model.id} className="workflow-card">
-              <div>
-                <div className="card-top">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span
-                      className={`px-2 py-0.5 text-[10px] font-mono font-bold uppercase border-2 border-black shadow-[1px_1px_0px_#000] ${
-                        model.isLocalAvailable ? 'bg-cyan-200 text-black' : 'bg-purple-200 text-black'
-                      }`}
-                    >
-                      {model.isLocalAvailable ? 'ON-DEVICE' : 'CLOUD ENDPOINT'}
-                    </span>
+              <div className="card-name" style={{ fontSize: '14px' }}>
+                {model.name}
+              </div>
+              <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--accent-cyan)', marginBottom: '6px' }}>
+                {model.capability}
+              </div>
+              <div className="card-desc">{model.description}</div>
+            </div>
 
-                    {isRealRuntime ? (
-                      <span className="px-1.5 py-0.5 text-[10px] font-mono font-black uppercase border border-black bg-emerald-300 text-black">
-                        REAL RUNTIME
-                      </span>
-                    ) : (
-                      <span className="px-1.5 py-0.5 text-[10px] font-mono font-bold uppercase border border-black bg-zinc-100 text-zinc-600">
-                        METADATA ONLY
-                      </span>
-                    )}
-                  </div>
-
-                  <span className="text-[11px] font-mono font-bold text-zinc-500">
-                    {model.quantization}
+            <div>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, 1fr)',
+                  gap: '6px',
+                  background: 'var(--bg-app)',
+                  padding: '8px',
+                  borderRadius: '4px',
+                  border: '1px solid var(--border-subtle)',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '10px',
+                  marginBottom: '10px'
+                }}
+              >
+                <div>
+                  <span style={{ color: 'var(--text-muted)' }}>RAM: </span>
+                  <span style={{ fontWeight: 600 }}>{model.ramRequirementMb}MB</span>
+                </div>
+                <div>
+                  <span style={{ color: 'var(--text-muted)' }}>LATENCY: </span>
+                  <span style={{ fontWeight: 600 }}>~{model.expectedLatencyMs}ms</span>
+                </div>
+                <div>
+                  <span style={{ color: 'var(--text-muted)' }}>QUALITY: </span>
+                  <span style={{ fontWeight: 600, color: 'var(--status-success)' }}>
+                    {Math.round(model.qualityScore * 100)}%
                   </span>
                 </div>
-
-                <div className="card-name">{model.name}</div>
-                <div className="text-xs font-mono font-bold text-cyan-800 uppercase mb-2">
-                  {model.capability}
-                </div>
-                <div className="card-desc">{model.description}</div>
               </div>
 
-              <div>
-                {/* 3-Cell Specs Grid */}
-                <div className="grid grid-cols-3 gap-2 p-2.5 bg-zinc-50 border-2 border-black font-mono text-[10px] shadow-[2px_2px_0px_#000] mb-3">
-                  <div>
-                    <span className="text-zinc-500 block uppercase font-bold">RAM:</span>
-                    <span className="font-black text-black">{model.ramRequirementMb} MB</span>
-                  </div>
-                  <div>
-                    <span className="text-zinc-500 block uppercase font-bold">LATENCY:</span>
-                    <span className="font-black text-black">~{model.expectedLatencyMs}ms</span>
-                  </div>
-                  <div>
-                    <span className="text-zinc-500 block uppercase font-bold">QUALITY:</span>
-                    <span className="font-black text-emerald-700">
-                      {Math.round(model.qualityScore * 100)}%
-                    </span>
-                  </div>
+              <div className="card-actions">
+                <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
+                  HW: {model.supportedDelegates.join(', ')}
                 </div>
-
-                <div className="card-actions">
-                  <div className="text-[10px] font-mono text-zinc-600 font-bold truncate max-w-[170px]">
-                    HW: {model.supportedDelegates.join(', ')}
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-[11px] py-1"
-                    onClick={() => setInspectModel(model)}
-                  >
-                    Inspect Spec
-                  </Button>
-                </div>
+                <button
+                  className="btn-secondary"
+                  style={{ fontSize: '11px', padding: '4px 10px' }}
+                  onClick={() => setInspectModel(model)}
+                >
+                  Inspect Spec
+                </button>
               </div>
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
 
       {/* Model Spec Inspection Dialog */}
@@ -218,26 +198,18 @@ export const ModelRegistryScreen: React.FC = () => {
           <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div>
-                <span className="text-[10px] font-mono font-bold text-black uppercase">
-                  MODEL ARCHITECTURE & SPECIFICATION
-                </span>
-                <h3 className="text-base font-black font-mono uppercase text-black">
-                  {inspectModel.name}
-                </h3>
+                <span className="stat-label">MODEL ARCHITECTURE & SPECIFICATION</span>
+                <h3 style={{ fontSize: '16px', fontWeight: 600 }}>{inspectModel.name}</h3>
               </div>
-              <Button variant="outline" size="sm" onClick={() => setInspectModel(null)}>
-                ✕
-              </Button>
+              <button className="btn-secondary" onClick={() => setInspectModel(null)}>✕</button>
             </div>
-            <div className="modal-body p-4 bg-zinc-50">
-              <pre className="code-view max-h-96">
+            <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <pre className="code-view">
                 {JSON.stringify(inspectModel, null, 2)}
               </pre>
             </div>
             <div className="modal-footer">
-              <Button variant="default" size="sm" onClick={() => setInspectModel(null)}>
-                Close
-              </Button>
+              <button className="btn-secondary" onClick={() => setInspectModel(null)}>Close</button>
             </div>
           </div>
         </div>

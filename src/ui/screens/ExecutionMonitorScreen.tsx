@@ -6,10 +6,6 @@ import { DAGVisualizer } from '../components/DAGVisualizer';
 import { ExplainabilityModal } from '../components/ExplainabilityModal';
 import { ExecutionHistoryStore } from '../../data/history-store';
 import { NotificationActionController } from '../../core/notification/notification-controller';
-import { Button } from '../components/Button';
-import { Badge } from '../components/Badge';
-import { StatusPill } from '../components/StatusPill';
-import { Play, ArrowLeft, RefreshCw, Upload, Terminal, Cpu, Database, CheckCircle2 } from 'lucide-react';
 
 interface ExecutionMonitorScreenProps {
   workflow: Workflow;
@@ -88,7 +84,6 @@ export const ExecutionMonitorScreen: React.FC<ExecutionMonitorScreenProps> = ({
   const startRun = async (overrideInput?: any) => {
     try {
       let inputPayload: any;
-      // Guard against React SyntheticEvent being passed as overrideInput
       if (overrideInput && typeof overrideInput === 'object' && !('nativeEvent' in overrideInput)) {
         inputPayload = overrideInput;
       } else if (selectedPreset === 'custom_upload' && uploadedImage) {
@@ -164,78 +159,67 @@ export const ExecutionMonitorScreen: React.FC<ExecutionMonitorScreenProps> = ({
   const progressPercent = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
 
   return (
-    <div className="space-y-8 w-full min-w-0 pb-12">
-      {/* 1. Top Header & Execution Controls */}
-      <section className="border-3 border-black bg-white shadow-[4px_4px_0px_#000] p-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-black uppercase tracking-wider text-black">
-                WORKFLOW EXECUTION STREAM
-              </span>
-              <Badge variant="cyber" className="text-[10px]">
-                LIVE RUNTIME
-              </Badge>
-            </div>
-            <h1 className="text-xl sm:text-2xl font-black font-mono tracking-tight text-black uppercase mt-1">
-              {workflow.name}
-            </h1>
-          </div>
-
-          <div className="flex items-center gap-2 flex-wrap">
-            <Button variant="outline" size="sm" onClick={onBackToBuilder}>
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back to DAG</span>
-            </Button>
-            <Button
-              variant="default"
-              size="sm"
-              id="re-execute-btn"
-              onClick={() => startRun()}
-              disabled={report?.status === 'RUNNING'}
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${report?.status === 'RUNNING' ? 'animate-spin' : ''}`} />
-              <span>{report?.status === 'RUNNING' ? 'Running...' : 'Re-execute Workflow'}</span>
-            </Button>
-          </div>
+    <div>
+      {/* Top Header & Execution Controls */}
+      <div className="section-header">
+        <div>
+          <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--accent-cyan)' }}>
+            DEVICE-AWARE EXECUTION RUNTIME
+          </span>
+          <h2 style={{ fontSize: '18px', fontWeight: 600 }}>{workflow.name}</h2>
         </div>
-      </section>
 
-      {/* 2. Real Input Selection & Transparency Audit Bar */}
-      <section className="border-2 border-black bg-white shadow-[4px_4px_0px_#000] p-4 sm:p-5">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5 flex-wrap">
-            <span className="text-xs font-mono font-black uppercase text-zinc-900">
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button className="btn-secondary" onClick={onBackToBuilder}>
+            ← Back to DAG
+          </button>
+          <button
+            id="re-execute-btn"
+            className="btn-primary"
+            onClick={() => startRun()}
+            disabled={report?.status === 'RUNNING'}
+          >
+            {report?.status === 'RUNNING' ? 'Running...' : '↺ Re-execute Workflow'}
+          </button>
+        </div>
+      </div>
+      {/* Real Input Selection & Transparency Audit Bar (Phase 5 & 11) */}
+      <div
+        style={{
+          background: 'var(--bg-surface-1)',
+          border: '1px solid var(--border-default)',
+          borderRadius: '8px',
+          padding: '12px 16px',
+          marginBottom: '16px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '10px'
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--accent-cyan)' }}>
               REAL INPUT DATA:
             </span>
-
-            {/* Hidden native input for test/CDP automation */}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileUpload}
-              style={{ display: 'none' }}
-              id="real-image-input"
-            />
-
             <label
-              htmlFor="real-image-input"
-              className="btn-primary text-xs py-1.5 px-3 cursor-pointer inline-flex items-center gap-1.5"
+              className="btn-secondary"
+              style={{ fontSize: '11px', padding: '4px 10px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
-              <Upload className="w-3.5 h-3.5" />
-              <span>📷 Upload User Receipt Image</span>
+              📷 Upload User Receipt Image
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileUpload}
+                style={{ display: 'none' }}
+                id="real-image-input"
+              />
             </label>
-
-            <span className="text-xs font-mono text-zinc-500 font-bold">OR PRESET:</span>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>or preset:</span>
             {Object.entries(PRESETS).map(([key, val]) => (
               <button
                 key={key}
-                type="button"
-                className={`px-2.5 py-1 text-xs font-mono font-bold border-2 border-black transition-all cursor-pointer ${
-                  selectedPreset === key
-                    ? 'bg-black text-amber-300 shadow-[2px_2px_0px_#FACC15]'
-                    : 'bg-zinc-100 text-black hover:bg-zinc-200 shadow-[2px_2px_0px_#000]'
-                }`}
+                className={selectedPreset === key ? 'btn-primary' : 'btn-secondary'}
+                style={{ fontSize: '10px', padding: '3px 8px' }}
                 onClick={() => handleSelectPreset(key)}
               >
                 {val.label}
@@ -243,105 +227,86 @@ export const ExecutionMonitorScreen: React.FC<ExecutionMonitorScreenProps> = ({
             ))}
           </div>
 
-          {/* Audit Verification Badges */}
-          <div className="flex items-center gap-2 flex-wrap pt-2 lg:pt-0 border-t lg:border-t-0 border-zinc-200">
-            <span className="text-xs font-mono text-zinc-600 font-bold uppercase">
-              Platform Audit:
-            </span>
-            {workflow.id === 'wf_finance_bill' || workflow.id === 'wf-finance' ? (
-              selectedPreset === 'custom_upload' && !!uploadedImage ? (
-                <>
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-mono font-bold uppercase border-2 border-black bg-emerald-300 text-black shadow-[2px_2px_0px_#000]">
-                    ● REAL INFERENCE
-                  </span>
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-mono font-bold uppercase border-2 border-black bg-cyan-300 text-black shadow-[2px_2px_0px_#000]">
-                    ● REAL ARITHMETIC
-                  </span>
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-mono font-bold uppercase border-2 border-black bg-purple-300 text-black shadow-[2px_2px_0px_#000]">
-                    ● REAL PERSISTENCE
-                  </span>
-                </>
-              ) : (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-mono font-bold uppercase border-2 border-black bg-amber-300 text-black shadow-[2px_2px_0px_#000]">
-                  ● DEMO SIMULATION
+          <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Platform Audit:</span>
+            {workflow.id === 'wf-finance' ? (
+              <>
+                <span className="location-badge ON_DEVICE" style={{ background: 'rgba(52, 211, 153, 0.15)', color: '#34d399', border: '1px solid #34d399', fontSize: '10px' }}>
+                  ● REAL INFERENCE
                 </span>
-              )
+                <span className="location-badge ON_DEVICE" style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1px solid #38bdf8', fontSize: '10px' }}>
+                  ● REAL ARITHMETIC
+                </span>
+                {selectedPreset === 'custom_upload' ? (
+                  <span className="location-badge ON_DEVICE" style={{ background: 'rgba(6, 182, 212, 0.15)', color: '#22d3ee', border: '1px solid #22d3ee', fontSize: '10px' }}>
+                    ● TESSERACT WASM REAL OCR
+                  </span>
+                ) : (
+                  <span className="location-badge CLOUD" style={{ background: 'rgba(251, 191, 36, 0.15)', color: '#fbbf24', border: '1px solid #fbbf24', fontSize: '10px' }}>
+                    ● DEMO SIMULATION
+                  </span>
+                )}
+              </>
             ) : (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-mono font-bold uppercase border-2 border-black bg-amber-300 text-black shadow-[2px_2px_0px_#000]">
+              <span className="location-badge CLOUD" style={{ background: 'rgba(251, 191, 36, 0.15)', color: '#fbbf24', border: '1px solid #fbbf24', fontSize: '10px' }}>
                 ● DEMO SIMULATION
               </span>
             )}
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* 3. Progress & Live Telemetry Bar */}
-      <section className="border-2 border-black bg-white shadow-[4px_4px_0px_#000] p-4 sm:p-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
-          <div className="flex items-center gap-3">
+      {/* Progress & Live Telemetry Bar */}
+      <div
+        style={{
+          background: 'var(--bg-surface-1)',
+          border: '1px solid var(--border-default)',
+          borderRadius: '8px',
+          padding: '16px',
+          marginBottom: '16px'
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span
               className="status-pill"
               style={{
-                backgroundColor:
+                color:
                   report?.status === 'RUNNING'
-                    ? '#67e8f9'
+                    ? 'var(--accent-blue)'
                     : report?.status === 'COMPLETED'
-                    ? '#6ee7b7'
-                    : report?.status === 'FAILED'
-                    ? '#fca5a5'
-                    : '#ffffff'
+                    ? 'var(--status-success)'
+                    : 'var(--status-error)',
+                fontWeight: 600
               }}
             >
               {report?.status || 'INITIALIZING'}
             </span>
-            <span className="text-xs font-mono font-bold text-zinc-700">
-              Step {completedSteps} of {totalSteps} completed ({progressPercent}%)
+            <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+              Step {completedSteps} of {totalSteps} completed
             </span>
           </div>
 
-          <div className="flex items-center gap-4 text-xs font-mono font-bold flex-wrap">
-            <div>
-              <span className="text-zinc-500 uppercase">Duration: </span>
-              <span className="text-black">
-                {report?.totalDurationMs ? `${report.totalDurationMs}ms` : 'Measuring...'}
-              </span>
-            </div>
-            <div>
-              <span className="text-zinc-500 uppercase">Peak RAM: </span>
-              <span className="text-cyan-800">{report?.totalMemoryPeakMb || 0} MB</span>
-            </div>
-            <div>
-              <span className="text-zinc-500 uppercase">Cache Hits: </span>
-              <span className="text-emerald-700">{report?.cacheHitsCount || 0}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Progress Bar */}
-        <div className="w-full h-3 border-2 border-black bg-zinc-100 overflow-hidden shadow-[1px_1px_0px_#000]">
-          <div
-            className="h-full bg-amber-400 border-r-2 border-black transition-all duration-300"
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
-      </section>
-
-      {/* 4. Live Visual DAG Graph Canvas */}
-      <section className="border-2 border-black bg-white shadow-[4px_4px_0px_#000] p-5">
-        <div className="flex items-center justify-between pb-3 border-b-2 border-black mb-4">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-mono font-black uppercase text-black">
-              ADAPTIVE EXECUTION DECISION GRAPH
+          <div style={{ display: 'flex', gap: '14px', fontFamily: 'var(--font-mono)', fontSize: '12px' }}>
+            <span>
+              Duration: <strong style={{ color: 'var(--text-primary)' }}>{report?.totalDurationMs ? `${report.totalDurationMs}ms` : 'Measuring...'}</strong>
             </span>
-            <Badge variant="cyber" className="text-[10px]">
-              REACT FLOW DAG
-            </Badge>
+            <span>
+              Peak RAM: <strong style={{ color: 'var(--accent-cyan)' }}>{report?.totalMemoryPeakMb || 0} MB</strong>
+            </span>
+            <span>
+              Cache Hits: <strong style={{ color: '#34d399' }}>{report?.cacheHitsCount || 0}</strong>
+            </span>
           </div>
-          <span className="text-[11px] font-mono text-zinc-600 font-bold hidden sm:inline">
-            Click any node to inspect execution telemetry
-          </span>
         </div>
 
+        <div className="progress-track" style={{ height: '6px' }}>
+          <div className="progress-fill" style={{ width: `${progressPercent}%` }}></div>
+        </div>
+      </div>
+
+      {/* Live Visual DAG Graph */}
+      <div style={{ marginBottom: '16px' }}>
         <DAGVisualizer
           workflow={workflow}
           nodeStatusMap={nodeStatusMap}
@@ -353,34 +318,24 @@ export const ExecutionMonitorScreen: React.FC<ExecutionMonitorScreenProps> = ({
             }
           }}
         />
-      </section>
+      </div>
 
-      {/* 5. Split Inspector: Execution Timeline on Left, Live Node Diagnostics on Right */}
-      <div className="flex flex-col lg:flex-row gap-4 items-stretch min-w-0">
-        {/* Left: Execution Timeline (flex: 1) */}
-        <div className="flex-1 min-w-0 min-h-0 border-2 border-black bg-white shadow-[4px_4px_0px_#000] p-4 sm:p-5 flex flex-col">
-          <div className="flex items-center justify-between pb-3 border-b-2 border-black mb-4 shrink-0">
-            <span className="text-xs font-mono font-black uppercase text-black">
-              EXECUTION TIMELINE & DATA FLOW
-            </span>
-            <span className="text-[11px] font-mono text-zinc-600 font-bold">
-              {workflow.nodes.length} SEQUENCED NODES
-            </span>
-          </div>
+      {/* Split Inspector: Execution Timeline on Left, Live Node Diagnostics on Right */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '16px' }}>
+        {/* Step-by-Step Timeline */}
+        <div style={{ background: 'var(--bg-surface-1)', border: '1px solid var(--border-default)', borderRadius: '8px', padding: '16px' }}>
+          <h3 style={{ fontSize: '13px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', marginBottom: '12px' }}>
+            EXECUTION TIMELINE & DATA FLOW
+          </h3>
 
-          <div className="space-y-3 flex-1 overflow-y-auto max-h-[580px] pr-1">
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
             {workflow.nodes.map((node, index) => {
               const rec = report?.nodeRecords[node.id];
               const status = rec?.status || 'QUEUED';
               const isSelected = selectedRecord?.nodeId === node.id;
-              const isFinance = workflow.id === 'wf_finance_bill' || workflow.id === 'wf-finance';
-              const isRealRun = selectedPreset === 'custom_upload' && !!uploadedImage;
-              const isRealOCR =
-                isFinance && node.capability === 'OCR' && (isRealRun || rec?.selectedModelName?.includes('Tesseract'));
-              const isRealArithmetic =
-                isFinance && node.type === 'TRANSFORM' && (isRealRun || selectedPreset === 'custom_upload');
-              const isRealPersistence =
-                isFinance && node.type === 'ANDROID_ACTION' && (isRealRun || selectedPreset === 'custom_upload');
+              const isRealOCR = workflow.id === 'wf-finance' && node.capability === 'OCR';
+              const isRealArithmetic = workflow.id === 'wf-finance' && node.type === 'TRANSFORM';
+              const isRealPersistence = workflow.id === 'wf-finance' && node.type === 'ANDROID_ACTION';
               const classifLabel = isRealOCR
                 ? '● REAL INFERENCE'
                 : isRealArithmetic
@@ -388,20 +343,24 @@ export const ExecutionMonitorScreen: React.FC<ExecutionMonitorScreenProps> = ({
                 : isRealPersistence
                 ? '● REAL PERSISTENCE'
                 : '● DEMO SIMULATION';
-              const classifBadgeVariant = isRealOCR
-                ? 'success'
+              const classifColor = isRealOCR
+                ? '#34d399'
                 : isRealArithmetic
-                ? 'cyber'
+                ? '#38bdf8'
                 : isRealPersistence
-                ? 'purple'
-                : 'default';
+                ? '#a78bfa'
+                : '#fbbf24';
 
               return (
                 <div
                   key={node.id}
-                  className={`timeline-step ${
-                    isSelected ? 'ring-2 ring-black bg-amber-50 shadow-[4px_4px_0px_#000]' : ''
-                  }`}
+                  className="timeline-step"
+                  style={{
+                    background: isSelected ? 'var(--bg-surface-2)' : 'transparent',
+                    padding: '10px',
+                    borderRadius: '6px',
+                    cursor: 'pointer'
+                  }}
                   onClick={() => rec && setSelectedRecord(rec)}
                 >
                   <div className={`step-marker ${status}`}>
@@ -410,15 +369,15 @@ export const ExecutionMonitorScreen: React.FC<ExecutionMonitorScreenProps> = ({
 
                   <div className="step-content">
                     <div className="step-header">
-                      <div className="flex items-center gap-2 flex-wrap">
+                      <div>
                         <span className="step-title">{node.label}</span>
-                        <Badge variant={classifBadgeVariant as any} className="text-[10px]">
+                        <span style={{ fontSize: '10px', color: classifColor, marginLeft: '6px', fontWeight: 600 }}>
                           {classifLabel}
-                        </Badge>
+                        </span>
                       </div>
                       <div className="step-meta">
                         {rec?.cacheHit && (
-                          <span className="text-emerald-700 font-black">⚡ CACHE HIT</span>
+                          <span style={{ color: '#34d399', fontWeight: 600 }}>⚡ CACHE HIT</span>
                         )}
                         {rec?.latencyMs !== undefined && (
                           <span>{rec.latencyMs}ms</span>
@@ -431,18 +390,16 @@ export const ExecutionMonitorScreen: React.FC<ExecutionMonitorScreenProps> = ({
                       </div>
                     </div>
 
-                    <div className="text-xs font-mono text-zinc-700 mt-1">
+                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
                       {rec?.selectedModelName ? (
-                        <span>
-                          Runtime: <strong>{rec.selectedModelName}</strong>
-                        </span>
+                        <span>Model: <strong>{rec.selectedModelName}</strong></span>
                       ) : (
                         <span>Type: {node.type} ({node.capability})</span>
                       )}
                     </div>
 
                     {rec?.fallbackTriggered && (
-                      <div className="text-xs font-mono text-purple-700 font-bold mt-1">
+                      <div style={{ color: 'var(--status-fallback)', fontSize: '11px', marginTop: '4px' }}>
                         ⚠️ {rec.fallbackReason}
                       </div>
                     )}
@@ -453,69 +410,61 @@ export const ExecutionMonitorScreen: React.FC<ExecutionMonitorScreenProps> = ({
           </div>
         </div>
 
-        {/* Right: Selected Step Inspector (flex: 1) */}
-        <div className="flex-1 min-w-0 min-h-0 border-2 border-black bg-white shadow-[4px_4px_0px_#000] p-4 sm:p-5 flex flex-col">
-          <div className="flex items-center justify-between pb-3 border-b-2 border-black mb-4 shrink-0">
-            <span className="text-xs font-mono font-black uppercase text-black">
-              NODE INSPECTOR & TELEMETRY
-            </span>
-            {selectedRecord && (
-              <span className={`status-pill ${selectedRecord.status}`}>
-                {selectedRecord.status}
-              </span>
-            )}
-          </div>
-
+        {/* Selected Step Inspector Card */}
+        <div style={{ background: 'var(--bg-surface-1)', border: '1px solid var(--border-default)', borderRadius: '8px', padding: '16px' }}>
           {selectedRecord ? (
-            <div className="space-y-4">
-              <div>
-                <div className="text-[10px] font-mono font-bold text-zinc-500 uppercase">
-                  ACTIVE NODE
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <div>
+                  <span className="stat-label">SELECTED STEP DETAILS</span>
+                  <h3 style={{ fontSize: '15px', fontWeight: 600 }}>{selectedRecord.label}</h3>
                 </div>
-                <h3 className="text-base font-black font-mono uppercase text-black">
-                  {selectedRecord.label}
-                </h3>
+                <span className={`status-pill ${selectedRecord.status}`}>
+                  {selectedRecord.status}
+                </span>
               </div>
 
               {/* Model & Routing telemetry */}
               {selectedRecord.selectedModelName && (
-                <div className="border-2 border-black bg-zinc-50 p-3 shadow-[2px_2px_0px_#000]">
-                  <div className="flex items-center justify-between mb-2">
+                <div style={{ background: 'var(--bg-app)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '12px', marginBottom: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                     <div>
-                      <div className="text-[10px] font-mono font-bold text-zinc-500 uppercase">
+                      <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
                         {selectedRecord.nodeId === 'node_bill_ocr' ? 'OCR ENGINE / RUNTIME' : 'SELECTED MODEL'}
                       </div>
-                      <div className="text-sm font-black font-mono text-black">
+                      <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>
                         {selectedRecord.selectedModelName}
-                      </div>
+                      </span>
                     </div>
                     {selectedRecord.scoreBreakdown && !selectedRecord.selectedModelName.includes('Tesseract') && (
                       <button
-                        type="button"
-                        className="btn-secondary text-[10px] py-0.5 px-2"
+                        className="btn-secondary"
+                        style={{ fontSize: '10px', padding: '2px 6px', color: 'var(--accent-cyan)' }}
                         onClick={() => setExplainModalOpen(true)}
                       >
-                        Why this? ↗
+                        Why this model? ↗
                       </button>
                     )}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 text-xs font-mono pt-2 border-t border-zinc-300">
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '11px', fontFamily: 'var(--font-mono)' }}>
                     <div>
-                      <span className="text-zinc-500">Location: </span>
-                      <span className="font-bold">{selectedRecord.executionLocation}</span>
+                      <span style={{ color: 'var(--text-muted)' }}>Location: </span>
+                      <span className={`location-badge ${selectedRecord.executionLocation}`}>
+                        {selectedRecord.executionLocation}
+                      </span>
                     </div>
                     <div>
-                      <span className="text-zinc-500">Memory: </span>
-                      <span className="font-bold">{selectedRecord.ramConsumedMb || 0} MB</span>
+                      <span style={{ color: 'var(--text-muted)' }}>Memory: </span>
+                      <span>{selectedRecord.ramConsumedMb || 0} MB</span>
                     </div>
                     <div>
-                      <span className="text-zinc-500">Latency: </span>
-                      <span className="font-bold">{selectedRecord.latencyMs || 0} ms</span>
+                      <span style={{ color: 'var(--text-muted)' }}>Latency: </span>
+                      <span>{selectedRecord.latencyMs || 0} ms</span>
                     </div>
                     <div>
-                      <span className="text-zinc-500">Cache Hit: </span>
-                      <span className={`font-bold ${selectedRecord.cacheHit ? 'text-emerald-700' : 'text-zinc-700'}`}>
+                      <span style={{ color: 'var(--text-muted)' }}>Cache Hit: </span>
+                      <span style={{ color: selectedRecord.cacheHit ? '#34d399' : 'inherit' }}>
                         {selectedRecord.cacheHit ? 'YES' : 'NO'}
                       </span>
                     </div>
@@ -523,12 +472,10 @@ export const ExecutionMonitorScreen: React.FC<ExecutionMonitorScreenProps> = ({
                 </div>
               )}
 
-              {/* Telemetry & Node Logs */}
+              {/* Execution Console Logs */}
               <div>
-                <div className="text-[10px] font-mono font-bold text-zinc-500 uppercase mb-1">
-                  EXECUTION LOG CONSOLE:
-                </div>
-                <div className="border-2 border-black bg-zinc-900 p-3 font-mono text-xs text-zinc-300 max-h-36 overflow-y-auto space-y-1">
+                <span className="stat-label">Telemetry & Node Logs</span>
+                <div className="step-log-console">
                   {selectedRecord.logLines.map((line, i) => (
                     <div key={i}>{line}</div>
                   ))}
@@ -537,20 +484,18 @@ export const ExecutionMonitorScreen: React.FC<ExecutionMonitorScreenProps> = ({
 
               {/* Step Output Inspector */}
               {selectedRecord.outputData && (
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[10px] font-mono font-bold text-zinc-500 uppercase">
-                      INTERMEDIATE OUTPUT ARTIFACT:
-                    </span>
+                <div style={{ marginTop: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                    <span className="stat-label">Intermediate Output Result</span>
                     <button
-                      type="button"
-                      className="btn-secondary text-[10px] py-0.5 px-2"
+                      className="btn-secondary"
+                      style={{ fontSize: '10px', padding: '2px 6px' }}
                       onClick={() => setInspectedOutput(selectedRecord.outputData)}
                     >
                       Expand View
                     </button>
                   </div>
-                  <pre className="code-view max-h-44 overflow-y-auto">
+                  <pre className="code-view" style={{ maxHeight: '160px', overflowY: 'auto' }}>
                     {typeof selectedRecord.outputData === 'string'
                       ? selectedRecord.outputData
                       : JSON.stringify(selectedRecord.outputData, null, 2)}
@@ -559,8 +504,8 @@ export const ExecutionMonitorScreen: React.FC<ExecutionMonitorScreenProps> = ({
               )}
             </div>
           ) : (
-            <div className="text-xs font-mono text-zinc-500 text-center py-12">
-              Select any step from the execution timeline to inspect diagnostics and telemetry.
+            <div style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '40px 0' }}>
+              Select a step from the execution timeline to inspect diagnostics.
             </div>
           )}
         </div>
@@ -576,26 +521,18 @@ export const ExecutionMonitorScreen: React.FC<ExecutionMonitorScreenProps> = ({
       {/* Expanded Output Inspector Modal */}
       {inspectedOutput && (
         <div className="modal-backdrop" onClick={() => setInspectedOutput(null)}>
-          <div className="modal-dialog max-w-3xl" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-dialog" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '720px' }}>
             <div className="modal-header">
-              <h3 className="text-base font-black font-mono uppercase text-black">
-                Detailed Step Artifact
-              </h3>
-              <Button variant="outline" size="sm" onClick={() => setInspectedOutput(null)}>
-                ✕
-              </Button>
+              <h3 style={{ fontSize: '15px', fontWeight: 600 }}>Detailed Step Output</h3>
+              <button className="btn-secondary" onClick={() => setInspectedOutput(null)}>✕</button>
             </div>
-            <div className="modal-body p-4 bg-zinc-100">
-              <pre className="code-view max-h-[500px]">
-                {typeof inspectedOutput === 'string'
-                  ? inspectedOutput
-                  : JSON.stringify(inspectedOutput, null, 2)}
+            <div className="modal-body">
+              <pre className="code-view" style={{ maxHeight: '500px' }}>
+                {typeof inspectedOutput === 'string' ? inspectedOutput : JSON.stringify(inspectedOutput, null, 2)}
               </pre>
             </div>
             <div className="modal-footer">
-              <Button variant="default" size="sm" onClick={() => setInspectedOutput(null)}>
-                Close
-              </Button>
+              <button className="btn-secondary" onClick={() => setInspectedOutput(null)}>Close</button>
             </div>
           </div>
         </div>
