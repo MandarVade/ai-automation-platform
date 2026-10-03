@@ -503,5 +503,44 @@ Models and Settings are supporting technical control surfaces in the secondary p
     4. **Runtime Hardware Simulation & Constraints**: One-touch hardware presets (`Pixel 8 Pro (NPU)`, `Budget (4GB RAM)`, `Offline Field Device`), power saver toggle, battery percentage/charging indicator, and thermal status.
     5. **Platform & System Information**: Definition-list grid rendering actual device context (OS, target device, RAM capacity, hardware acceleration, CPU cores, runtime version) and project attribution.
 
+---
+
+## 18. Motion System & Micro-Interactions (Phase 9)
+
+### Architectural Intent
+Motion in EL-06 is strictly governed by the principle:
+> **Animation communicates state, hierarchy, or causality.**
+
+Motion does not decorate, distract, or compensate for missing structure. The application strictly prohibits decorative AI tropes (no particle systems, glowing blobs, liquid gradients, neural net animations, or continuously moving graph backgrounds).
+
+### Motion Tokens (`src/ui/motion/motion-tokens.ts`)
+Standardized duration tiers and controlled easing curves:
+- **Duration Tiers**:
+  - `micro`: `140ms` (hover, button press active scale, handle highlights, toggle state shifts).
+  - `standard`: `220ms` (page entrance settle, dialog / sheet transitions, list filtering updates, step transitions).
+  - `emphasis`: `320ms` (complete panel reveals, complex modal layout changes, causal result card reveal).
+- **Controlled Easing**:
+  - `easeOut`: `[0.16, 1, 0.3, 1]` (clean deceleration for entering elements).
+  - `easeInOut`: `[0.4, 0, 0.2, 1]` (smooth state and dimension shifts).
+  - `subtleSpring`: `{ damping: 26, stiffness: 320 }` (physics-guided without visual bounce or overshoot).
+
+### Reusable Motion Primitives & Patterns (`src/ui/motion/`)
+- **`PageMotion` (`PageMotion.tsx`)**:
+  - Wraps all top-level screen containers (`page-home`, `page-studio`, `page-workflows`, `page-models`, `page-activity`, `page-settings`, `page-execution`).
+  - Standard mode: restrained 6px vertical settle with 220ms ease-out opacity.
+  - Reduced-motion mode: instantaneous 50ms opacity fade without positional displacement.
+- **`Dialog` & `Sheet` Motion**:
+  - `Dialog`: Opacity fade on overlay + 2% scale settle (`scale: 0.98 -> 1`) with 220ms ease-out.
+  - `Sheet`: Directional slide (`x: 24 -> 0` for right sheets, `y: 24 -> 0` for bottom mobile sheets).
+- **Node Selection & Execution Motion**:
+  - Selected state: Burnt orange border transition with subtle box-shadow highlight without scaling or repositioning nodes.
+  - Running state: Status indicator dot pulses (`el-status-indicator__dot--pulse`); edges are intentionally static (`animated: false`) to avoid idle CPU burn and graph-wide distraction.
+- **Workflow Generation Causality**:
+  - Natural language planner reveals generation state with spinner and causal status indicator (`Planning DAG...`) before rendering nodes in topological execution order.
+- **Reduced Motion Support**:
+  - All primitives consume `useReducedMotion()` from `motion/react` and CSS `@media (prefers-reduced-motion: reduce)`.
+  - In reduced-motion mode, all non-essential transitions are set to 0.01ms / disabled while maintaining full state and accessibility clarity.
+
+
 
 

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { NLWorkflowPlanner, NLIntentAnalysis } from '../../../core/workflow/nl-planner';
 import { Workflow } from '../../../types/workflow';
-import { Textarea, Button, Badge } from '../ui';
+import { Textarea, Button, StatusIndicator } from '../ui';
 import { Sparkles, ArrowRight, X, Layers } from 'lucide-react';
+import { motion, useReducedMotion } from 'motion/react';
+import { MOTION_DURATIONS, MOTION_EASINGS } from '../../motion';
 
 export interface StudioPromptPanelProps {
   initialPrompt?: string;
@@ -18,23 +20,34 @@ export const StudioPromptPanel: React.FC<StudioPromptPanelProps> = ({
   const [prompt, setPrompt] = useState(initialPrompt);
   const [isPlanning, setIsPlanning] = useState(false);
   const [lastAnalysis, setLastAnalysis] = useState<NLIntentAnalysis | null>(null);
+  const shouldReduceMotion = useReducedMotion();
 
   const handleGenerate = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!prompt.trim()) return;
+    if (!prompt.trim() || isPlanning) return;
 
     setIsPlanning(true);
-    // Reuse existing NLWorkflowPlanner
-    const analysis = NLWorkflowPlanner.planFromPrompt(prompt.trim());
-    setLastAnalysis(analysis);
 
-    // Call callback with generated workflow
-    onWorkflowGenerated(analysis.generatedWorkflow);
-    setIsPlanning(false);
+    // Controlled micro-delay communicating generation state before settling
+    setTimeout(() => {
+      try {
+        const analysis = NLWorkflowPlanner.planFromPrompt(prompt.trim());
+        setLastAnalysis(analysis);
+        onWorkflowGenerated(analysis.generatedWorkflow);
+      } finally {
+        setIsPlanning(false);
+      }
+    }, shouldReduceMotion ? 20 : 260);
   };
 
   return (
-    <div className="el-studio-prompt-panel">
+    <motion.div
+      className="el-studio-prompt-panel"
+      initial={{ opacity: 0, y: -6 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -4 }}
+      transition={{ duration: MOTION_DURATIONS.standard, ease: MOTION_EASINGS.easeOut }}
+    >
       <div className="el-studio-prompt-panel__header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Sparkles size={14} style={{ color: 'var(--color-accent)' }} />
@@ -107,7 +120,7 @@ export const StudioPromptPanel: React.FC<StudioPromptPanelProps> = ({
             loading={isPlanning}
             rightIcon={<ArrowRight size={13} />}
           >
-            Generate DAG
+            {isPlanning ? 'Planning DAG...' : 'Generate DAG'}
           </Button>
         </div>
       </form>
@@ -127,6 +140,6 @@ export const StudioPromptPanel: React.FC<StudioPromptPanelProps> = ({
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };

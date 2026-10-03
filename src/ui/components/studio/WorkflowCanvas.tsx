@@ -59,10 +59,11 @@ export const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
       source: e.sourceNodeId,
       target: e.targetNodeId,
       type: 'smoothstep',
-      animated: true,
+      animated: false,
       style: {
         stroke: 'var(--color-border-strong)',
         strokeWidth: 2,
+        transition: 'stroke var(--motion-duration-standard, 0.22s) ease',
       },
     }));
   }, [workflow.edges]);

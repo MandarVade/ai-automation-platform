@@ -16,6 +16,7 @@ import { Workflow } from './types/workflow';
 import { DEMO_WORKFLOWS } from './data/templates';
 import { NavTab } from './ui/navigation/nav-config';
 import { PageContainer, PageHeader } from './ui/components/ui';
+import { PageMotion } from './ui/motion';
 
 export const App: React.FC = () => {
   const [currentTab, setCurrentTab] = useState<NavTab>('home');
@@ -85,76 +86,92 @@ export const App: React.FC = () => {
       <main className="main-content">
         {isExecuting ? (
           <PageContainer width="wide">
-            <ExecutionMonitorScreen
-              workflow={activeWorkflow}
-              onBackToBuilder={() => setIsExecuting(false)}
-            />
+            <PageMotion id="page-execution">
+              <ExecutionMonitorScreen
+                workflow={activeWorkflow}
+                onBackToBuilder={() => setIsExecuting(false)}
+              />
+            </PageMotion>
           </PageContainer>
         ) : selectedWorkflowDetail ? (
           <PageContainer width="wide">
-            <WorkflowDetailScreen
-              workflow={selectedWorkflowDetail}
-              onBack={() => setSelectedWorkflowDetail(null)}
-              onEdit={handleEditInVisualBuilder}
-              onRun={handleRunWorkflow}
-            />
+            <PageMotion id="page-workflow-detail">
+              <WorkflowDetailScreen
+                workflow={selectedWorkflowDetail}
+                onBack={() => setSelectedWorkflowDetail(null)}
+                onEdit={handleEditInVisualBuilder}
+                onRun={handleRunWorkflow}
+              />
+            </PageMotion>
           </PageContainer>
         ) : (
           <>
             {currentTab === 'home' && (
               <PageContainer width="default">
-                <HomeScreen
-                  device={device}
-                  onSelectWorkflow={handleSelectWorkflow}
-                  onRunWorkflow={handleRunWorkflow}
-                  onStartNLPlan={handleStartNLPlan}
-                  onOpenVisualBuilder={() => {
-                    setStudioSubView('builder');
-                    setCurrentTab('studio');
-                  }}
-                />
+                <PageMotion id="page-home">
+                  <HomeScreen
+                    device={device}
+                    onSelectWorkflow={handleSelectWorkflow}
+                    onRunWorkflow={handleRunWorkflow}
+                    onStartNLPlan={handleStartNLPlan}
+                    onOpenVisualBuilder={() => {
+                      setStudioSubView('builder');
+                      setCurrentTab('studio');
+                    }}
+                  />
+                </PageMotion>
               </PageContainer>
             )}
 
             {(currentTab === 'studio' || currentTab === 'create' || currentTab === 'builder') && (
               <PageContainer width="wide">
-                <StudioScreen
-                  initialPrompt={initialNLPrompt || undefined}
-                  initialWorkflow={activeWorkflow}
-                  onRunWorkflow={handleRunWorkflow}
-                  activeSubView={studioSubView}
-                />
+                <PageMotion id="page-studio">
+                  <StudioScreen
+                    initialPrompt={initialNLPrompt || undefined}
+                    initialWorkflow={activeWorkflow}
+                    onRunWorkflow={handleRunWorkflow}
+                    activeSubView={studioSubView}
+                  />
+                </PageMotion>
               </PageContainer>
             )}
 
             {currentTab === 'workflows' && (
               <PageContainer width="wide">
-                <WorkflowsScreen
-                  workflows={DEMO_WORKFLOWS}
-                  onOpenWorkflow={handleEditInVisualBuilder}
-                  onRunWorkflow={handleRunWorkflow}
-                  onCreateWorkflow={() => {
-                    handleStartNLPlan('');
-                  }}
-                />
+                <PageMotion id="page-workflows">
+                  <WorkflowsScreen
+                    workflows={DEMO_WORKFLOWS}
+                    onOpenWorkflow={handleEditInVisualBuilder}
+                    onRunWorkflow={handleRunWorkflow}
+                    onCreateWorkflow={() => {
+                      handleStartNLPlan('');
+                    }}
+                  />
+                </PageMotion>
               </PageContainer>
             )}
 
             {currentTab === 'models' && (
               <PageContainer width="wide">
-                <ModelRegistryScreen />
+                <PageMotion id="page-models">
+                  <ModelRegistryScreen />
+                </PageMotion>
               </PageContainer>
             )}
 
             {currentTab === 'activity' && (
               <PageContainer width="wide">
-                <ActivityScreen onRunWorkflow={handleRunWorkflow} />
+                <PageMotion id="page-activity">
+                  <ActivityScreen onRunWorkflow={handleRunWorkflow} />
+                </PageMotion>
               </PageContainer>
             )}
 
             {currentTab === 'settings' && (
               <PageContainer width="default">
-                <SettingsScreen />
+                <PageMotion id="page-settings">
+                  <SettingsScreen />
+                </PageMotion>
               </PageContainer>
             )}
           </>

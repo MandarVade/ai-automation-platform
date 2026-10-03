@@ -70,6 +70,15 @@
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
   --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.7);
 
+  /* Motion System Tokens (Phase 9) */
+  --motion-duration-micro: 140ms;
+  --motion-duration-standard: 220ms;
+  --motion-duration-emphasis: 320ms;
+
+  --motion-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
   /* Breakpoint References (for CSS / JS documentation) */
   --bp-mobile: 480px;
   --bp-tablet: 768px;
@@ -3384,7 +3393,139 @@ pre, code {
 .el-exec-timeline__list {
   display: flex;
   flex-direction: column;
+  gap: var(--space-1);
+}
+
+.el-exec-timeline__step-wrapper {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.el-exec-timeline__step {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  background-color: transparent;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: background-color var(--motion-duration-micro) var(--motion-ease-out),
+              border-color var(--motion-duration-micro) var(--motion-ease-out),
+              transform var(--motion-duration-micro) var(--motion-ease-out);
+}
+
+.el-exec-timeline__step:hover {
+  background-color: var(--color-surface-secondary);
+  border-color: var(--color-border);
+}
+
+.el-exec-timeline__step--selected {
+  background-color: var(--color-surface-secondary);
+  border-color: var(--color-border-strong);
+}
+
+.el-exec-timeline__step--running {
+  border-left: 2px solid var(--color-accent);
+  background-color: rgba(217, 119, 82, 0.04);
+}
+
+.el-exec-timeline__marker {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-top: 1px;
+  background-color: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  transition: all var(--motion-duration-standard) var(--motion-ease-out);
+}
+
+.el-exec-timeline__icon--success {
+  color: var(--color-success);
+}
+
+.el-exec-timeline__icon--running {
+  color: var(--color-accent);
+  animation: el-pulse 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.el-exec-timeline__icon--error {
+  color: var(--color-error);
+}
+
+.el-exec-timeline__icon--warning {
+  color: var(--color-warning);
+}
+
+.el-exec-timeline__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.el-exec-timeline__row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: var(--space-2);
+}
+
+.el-exec-timeline__step-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.el-exec-timeline__latency {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.el-exec-timeline__row-sub {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.el-exec-timeline__dataflow {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.el-exec-timeline__cache-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-accent);
+  background-color: var(--color-accent-soft);
+  padding: 1px 5px;
+  border-radius: var(--radius-xs);
+}
+
+.el-exec-timeline__connector {
+  width: 2px;
+  height: 12px;
+  background-color: var(--color-border);
+  margin-left: 23px;
+  transition: background-color var(--motion-duration-standard) var(--motion-ease-out);
+}
+
+.el-exec-timeline__connector--completed {
+  background-color: var(--color-success);
 }
 
 .el-timeline-step {
@@ -4941,3 +5082,18 @@ pre, code {
   color: var(--color-text-muted);
   margin: 2px 0 0 0;
 }
+
+/* ==========================================================================
+   Prefers-Reduced-Motion Compliance (Phase 9 - Mandatory Accessibility)
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
