@@ -333,3 +333,17 @@ import { PageContainer, PageHeader } from './components/ui';
 - **Desktop (≥901px)**: Primary navigation in top sticky header (`AppHeader`), secondary links adjacent to simulation action, no bottom bar.
 - **Mobile (≤900px)**: 4-item primary bottom navigation bar (`BottomNav`), secondary navigation accessible through responsive slide-over sheet drawer (`Menu` button in header).
 
+---
+
+## 13. Studio Unified Editor Components (Phase 4)
+
+Studio is the central workflow-authoring environment unifying Natural Language intent planning and interactive visual DAG construction.
+
+**Key Components:**
+- `WorkflowCanvas`: React Flow wrapper (`@xyflow/react`) projecting the authoritative `Workflow` DAG onto an interactive canvas with pan, zoom, fit view, and node/edge interaction.
+- `WorkflowCanvasNode`: Custom React Flow node adhering to the EL-06 Obsidian/Warm White/Burnt Orange design system, rendering node type, capability, assigned model delegate, I/O ports, and status indicators.
+- `StudioToolbar`: Editor action bar providing workflow title, real-time `DAGValidator` status badge, undo/redo buttons, "Describe" NL prompt toggle, "Add Node" action, and primary "Run" execution trigger.
+- `NodeInspector`: Deep inspection and editing panel for selected nodes. Modifies node display label, execution policy (`AUTO`, `FORCE_LOCAL`, `FORCE_CLOUD`, `BATTERY_CONSERVE`), displays underlying capability, input/output data types, model delegates, and upstream dependencies. Renders as a side panel on desktop and a bottom `Sheet` on mobile.
+- `AddNodeDialog`: Accessible modal allowing users to search and add supported triggers (`CAMERA_CAPTURE`, `AUDIO_RECORD`, `MANUAL`), AI capabilities (`OCR`, `SPEECH_TO_TEXT`, `SUMMARIZATION`, `CONCEPT_EXTRACTION`, `QUESTION_GENERATION`, `PLANT_DISEASE_DIAGNOSIS`), transforms (`CALCULATE_TOTAL`, `STRUCTURED_JSON_MAP`), and Android actions (`EXPENSE_TRACKER_STORE`, `NOTIFICATION_EMIT`, `SAVE_FILE`).
+- `StudioPromptPanel`: Integrated natural-language generator that calls `NLWorkflowPlanner.planFromPrompt` and synchronizes the resulting workflow directly with the canvas.
+

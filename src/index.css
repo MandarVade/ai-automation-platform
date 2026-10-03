@@ -2144,5 +2144,491 @@ pre, code {
   }
 }
 
+/* ==========================================================================
+   EL-06 Studio Unified Editor (Phase 4)
+   ========================================================================== */
+
+.el-studio-layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  height: calc(100vh - 140px);
+  min-height: 600px;
+}
+
+/* Studio Toolbar */
+.el-studio-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-4);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.el-studio-toolbar__left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.el-studio-toolbar__title-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.el-studio-toolbar__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.el-studio-toolbar__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  padding: 2px 8px;
+  border-radius: var(--radius-xs);
+}
+
+.el-studio-toolbar__status--valid {
+  background-color: var(--color-success-soft);
+  color: var(--color-success);
+  border: 1px solid #23381E;
+}
+
+.el-studio-toolbar__status--error {
+  background-color: var(--color-error-soft);
+  color: var(--color-error);
+  border: 1px solid #4C1D18;
+}
+
+.el-studio-toolbar__center {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.el-studio-toolbar__divider {
+  width: 1px;
+  height: 20px;
+  background-color: var(--color-border-subtle);
+  margin: 0 var(--space-1);
+}
+
+.el-studio-toolbar__right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.el-studio-toolbar__mobile-inspector-btn {
+  display: none;
+}
+
+/* Validation banner */
+.el-studio-validation-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--color-error-soft);
+  border: 1px solid var(--color-error);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #F87171;
+}
+
+/* Prompt overlay */
+.el-studio-prompt-overlay {
+  width: 100%;
+}
+
+.el-studio-prompt-panel {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  box-shadow: var(--shadow-md);
+}
+
+.el-studio-prompt-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.el-studio-prompt-panel__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.el-studio-prompt-panel__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.el-studio-prompt-panel__templates {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.el-studio-prompt-panel__chip {
+  background-color: var(--color-surface-secondary);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.el-studio-prompt-panel__chip:hover {
+  border-color: var(--color-border-strong);
+  color: var(--color-text-primary);
+}
+
+.el-studio-prompt-panel__summary {
+  background-color: var(--color-surface-secondary);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-xs);
+  padding: 8px 12px;
+}
+
+/* Workspace layout */
+.el-studio-workspace {
+  display: flex;
+  flex: 1;
+  gap: var(--space-3);
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.el-studio-canvas-container {
+  flex: 1;
+  height: 100%;
+  position: relative;
+}
+
+.el-flow-canvas-wrapper {
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-bg);
+}
+
+/* React Flow Controls Override */
+.el-flow-controls {
+  box-shadow: none !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--radius-sm) !important;
+  background-color: var(--color-surface) !important;
+  overflow: hidden;
+}
+
+.el-flow-controls button {
+  background-color: var(--color-surface) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+  color: var(--color-text-secondary) !important;
+}
+
+.el-flow-controls button:hover {
+  background-color: var(--color-surface-secondary) !important;
+  color: var(--color-text-primary) !important;
+}
+
+/* Workflow Custom Node */
+.el-flow-node {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.15s ease;
+  user-select: none;
+}
+
+.el-flow-node--selected {
+  border-color: var(--color-accent) !important;
+  background-color: var(--color-surface-selected);
+}
+
+.el-flow-node--error {
+  border-color: var(--color-error) !important;
+}
+
+.el-flow-node__header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.el-flow-node__icon {
+  color: var(--color-accent);
+  display: flex;
+  align-items: center;
+}
+
+.el-flow-node__type-badge {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.el-flow-node__policy-badge {
+  margin-left: auto;
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--color-accent-hover);
+  background-color: var(--color-accent-soft);
+  padding: 1px 4px;
+  border-radius: 2px;
+}
+
+.el-flow-node__body {
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.el-flow-node__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  line-height: 1.3;
+}
+
+.el-flow-node__capability {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--color-text-muted);
+}
+
+.el-flow-node__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border-top: 1px solid var(--color-border-subtle);
+  background-color: var(--color-surface-secondary);
+  border-bottom-left-radius: var(--radius-md);
+  border-bottom-right-radius: var(--radius-md);
+}
+
+.el-flow-node__io {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--color-text-secondary);
+}
+
+.el-flow-node__model {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--color-accent);
+}
+
+/* React Flow Connection Handles */
+.el-flow-node__handle {
+  width: 8px !important;
+  height: 8px !important;
+  background-color: var(--color-border-strong) !important;
+  border: 2px solid var(--color-surface) !important;
+  border-radius: 50% !important;
+  transition: background-color 0.15s ease;
+}
+
+.el-flow-node__handle:hover {
+  background-color: var(--color-accent) !important;
+}
+
+/* Desktop Node Inspector */
+.el-studio-desktop-inspector {
+  width: 320px;
+  background-color: var(--color-surface);
+  border-left: 1px solid var(--color-border);
+  overflow-y: auto;
+}
+
+.el-node-inspector {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: var(--space-4);
+  gap: var(--space-4);
+}
+
+.el-node-inspector--empty {
+  align-items: center;
+  justify-content: center;
+}
+
+.el-node-inspector__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.el-node-inspector__badge {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.el-node-inspector__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-top: 2px;
+}
+
+.el-node-inspector__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.el-node-inspector__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.el-node-inspector__label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.el-node-inspector__value-box {
+  background-color: var(--color-surface-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
+  padding: 6px 8px;
+}
+
+.el-node-inspector__select {
+  width: 100%;
+  height: 36px;
+  padding: 0 var(--space-2);
+  background-color: var(--color-surface-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-size: 12px;
+  font-family: var(--font-sans);
+}
+
+.el-node-inspector__select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.el-node-inspector__hint {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  line-height: 1.35;
+  margin-top: 2px;
+}
+
+.el-node-inspector__grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+/* Node Picker Modal */
+.el-node-picker__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.el-node-picker__item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--space-3);
+  background-color: var(--color-surface-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.el-node-picker__item:hover {
+  border-color: var(--color-border-strong);
+  background-color: var(--color-surface-elevated);
+}
+
+.el-node-picker__item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.el-node-picker__item-icon {
+  color: var(--color-accent);
+  display: flex;
+}
+
+.el-node-picker__item-badge {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--color-text-muted);
+  background-color: var(--color-surface);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+.el-node-picker__item-desc {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  line-height: 1.35;
+}
+
+/* Responsive adjustments for Studio */
+@media (max-width: 900px) {
+  .el-studio-desktop-inspector {
+    display: none;
+  }
+  .el-studio-toolbar__mobile-inspector-btn {
+    display: flex;
+  }
+  .el-studio-layout {
+    height: calc(100vh - 160px);
+  }
+}
+
+
 
 
