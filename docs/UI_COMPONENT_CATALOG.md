@@ -413,3 +413,51 @@ Phase 6 rebuilds the Workflows destination as the reusable automation library fo
   - Features horizontal scroll track with smooth overflowing and overflow badge (`+N more`).
   - Non-draggable, zero-overhead, completely accessible with ARIA description of the pipeline.
 
+---
+
+## 16. Execution & Activity Experience System (Phase 7)
+
+Phase 7 restructures the execution and activity monitor around a **result-first information hierarchy** (`Result → Execution Summary → Workflow Timeline → Step Details → Technical Data`), creating a unified experience across live workflow runs and historical audit logs.
+
+### Core Presentation Components
+
+- **`ExecutionResultCard` (`ExecutionResultCard.tsx`)**:
+  - Result-first outcome hero answering: *What happened? Did it succeed? What did the workflow produce?*
+  - Replaces raw latency and hardware counters with human-readable outcome narratives tailored to each domain (Finance, Education, Healthcare, Productivity).
+  - Semantic status pill (`StatusIndicator`), workflow title, and clear action row (`Back`, `View Result`, `Re-run` with `id="re-execute-btn"`).
+  - Dynamically updates with live progress during workflow execution.
+
+- **`ExecutionSummaryBar` (`ExecutionSummaryBar.tsx`)**:
+  - Compact, high-density telemetry strip providing at-a-glance run progress.
+  - Step counter and live progress track (`X of Y steps completed`).
+  - Formatted elapsed duration (e.g., `1.45s`), start/end timeline timestamps, device model chip, and cache efficiency hits indicator.
+
+- **`ExecutionTimeline` (`ExecutionTimeline.tsx`)**:
+  - Clean vertical sequence visualizer tracking data flow across the automation pipeline.
+  - Semantic status icons for each step (`CheckCircle2` for success, `Zap` for active, `AlertCircle` for failure, `AlertTriangle` for fallback).
+  - Displays data flow description (e.g., `Image → Extracted Text`), resolved execution latency in `JetBrains Mono`, and cache hit badges.
+  - Click-to-inspect step selection with accessible keyboard navigation (`Enter` / `Space`).
+
+- **`ExecutionStepDetails` (`ExecutionStepDetails.tsx`)**:
+  - Step-level inspection card presenting step purpose, intermediate outputs, and resolved ML delegate.
+  - Incorporates `IntermediateResultViewer` to display human-readable outputs first.
+  - Resolved ML delegate chip with hardware target (On-Device NPU/CPU vs Cloud API) and deep explainability trigger (`Why this model? ↗`).
+  - Progressive disclosure toggle for **Technical Diagnostics & Logs**, revealing memory consumption, execution latency, and console log lines.
+
+- **`IntermediateResultViewer` (`IntermediateResultViewer.tsx`)**:
+  - Intelligent output formatter rendering text strings as readable paragraphs, structured records as clean key-value grids, and images as inline previews.
+  - Includes progressive disclosure button for raw JSON inspection with copy-to-clipboard functionality.
+
+- **`ExecutionDetailView` (`ExecutionDetailView.tsx`)**:
+  - Unified detail container shared between live runtime monitoring (`ExecutionMonitorScreen`) and historical audit review (`ActivityScreen`).
+  - Dual-column responsive split layout on desktop (Timeline on left, Step Inspector on right).
+  - Bottom `Sheet` drawer on mobile viewports (≤900px) when selecting timeline steps.
+  - Subordinate, collapsible input source bar for live execution (`#real-image-input` file upload and preset selectors).
+
+- **`ActivityScreen` (`ActivityScreen.tsx`)**:
+  - Redesigned execution audit log replacing legacy JSON modals with a clean card list and seamless drill-down into `ExecutionDetailView`.
+  - Search input for filtering by workflow name or status.
+  - Status filter tabs (`All Runs`, `Successful`, `Failed`) with live record counts.
+  - High-density activity cards displaying relative execution timestamps, step counts, duration, RAM usage, and cache hit metrics.
+
+

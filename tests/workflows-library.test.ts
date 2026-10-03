@@ -36,7 +36,7 @@ describe('Phase 6 — Workflow Library & WorkflowCard System', () => {
       allowCloudInference: true,
     },
     nodeRecords: {},
-    exportPayloadPreview: {},
+    finalOutputs: {},
   };
 
   describe('1. Formatting Utilities', () => {

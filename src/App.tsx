@@ -148,7 +148,7 @@ export const App: React.FC = () => {
 
             {currentTab === 'activity' && (
               <PageContainer width="wide">
-                <ActivityScreen />
+                <ActivityScreen onRunWorkflow={handleRunWorkflow} />
               </PageContainer>
             )}
 
