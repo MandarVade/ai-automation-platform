@@ -3,19 +3,27 @@ node_modules/
 .pnp
 .pnp.js
 
-# Production build outputs
+# Production build outputs & Vite cache
 dist/
 build/
+.vite/
 *.local
 
-# Android build outputs
+# Android build outputs & Caches
 android/.gradle/
 android/app/build/
 android/build/
 android/local.properties
 android/.idea/
+android/.cxx/
+android/.externalNativeBuild/
+android/captures/
 *.apk
 *.aab
+
+# Gradle wrapper downloads & distribution zips
+android/gradle/*.zip
+android/gradle-*-bin.zip
 
 # Environment and logs
 npm-debug.log*
@@ -23,5 +31,7 @@ yarn-debug.log*
 yarn-error.log*
 .env
 .env.local
+
+# OS files
 .DS_Store
 Thumbs.db
