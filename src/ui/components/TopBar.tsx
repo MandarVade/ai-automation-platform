@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Bell, SlidersHorizontal, Zap, Wifi, WifiOff, Battery, Flame, Smartphone } from 'lucide-react';
 import { DeviceContextManager } from '../../core/resources/device-context';
 import { DeviceContext } from '../../types/device';
 import { NotificationActionController, PersistentNotificationState } from '../../core/notification/notification-controller';
@@ -42,6 +43,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onOpenDeviceSettings, onNavigate
         <div className="left-group">
           <span>10:42 PM</span>
           <span className="status-pill" title="Hardware Model & Android OS">
+            <Smartphone size={12} style={{ color: 'var(--color-text-secondary)' }} />
             <span className="status-dot green"></span>
             {device.deviceModel} (API {device.androidVersion})
           </span>
@@ -49,6 +51,11 @@ export const TopBar: React.FC<TopBarProps> = ({ onOpenDeviceSettings, onNavigate
 
         <div className="right-group">
           <span className="status-pill" title="Network Connectivity">
+            {device.networkState === 'OFFLINE' ? (
+              <WifiOff size={12} style={{ color: 'var(--color-error)' }} />
+            ) : (
+              <Wifi size={12} style={{ color: 'var(--color-success)' }} />
+            )}
             <span className={`status-dot ${device.networkState === 'OFFLINE' ? 'red' : 'green'}`}></span>
             {networkLabel}
           </span>
@@ -56,20 +63,24 @@ export const TopBar: React.FC<TopBarProps> = ({ onOpenDeviceSettings, onNavigate
             RAM: {device.availableRamMb} / {device.totalRamMb} MB
           </span>
           <span className="status-pill" title="Battery & Charging State">
+            <Battery size={12} style={{ color: device.batteryPercentage < 20 ? 'var(--color-error)' : 'var(--color-text-secondary)' }} />
             <span className={`status-dot ${device.batteryPercentage < 20 ? 'red' : 'green'}`}></span>
-            {device.batteryPercentage}% {device.isCharging ? '⚡' : ''}
+            {device.batteryPercentage}%
+            {device.isCharging && <Zap size={11} style={{ color: 'var(--color-warning)' }} />}
           </span>
           <span className="status-pill" title="Thermal Throttling State">
+            <Flame size={12} style={{ color: thermalColor === 'green' ? 'var(--color-success)' : thermalColor === 'yellow' ? 'var(--color-warning)' : 'var(--color-error)' }} />
             <span className={`status-dot ${thermalColor}`}></span>
             {device.thermalStatus}
           </span>
           <button
             className="status-pill"
-            style={{ cursor: 'pointer', background: 'var(--bg-surface-3)', color: 'var(--accent-cyan)' }}
+            style={{ cursor: 'pointer', background: 'var(--color-surface-interactive)', color: 'var(--color-accent)' }}
             onClick={onOpenDeviceSettings}
             title="Adjust Device Context Simulation"
           >
-            ⚙️ Simulate Device
+            <SlidersHorizontal size={12} />
+            <span>Simulate Device</span>
           </button>
         </div>
       </div>
@@ -86,7 +97,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onOpenDeviceSettings, onNavigate
       >
         <div className="notification-meta" onClick={onNavigateToExecution} style={{ cursor: 'pointer' }}>
           <div className="notification-title">
-            <span style={{ fontSize: '14px' }}>🔔</span>
+            <Bell size={14} style={{ color: 'var(--color-accent)' }} />
             <span>{notifState.title}</span>
             <span
               className="status-pill"
@@ -94,10 +105,10 @@ export const TopBar: React.FC<TopBarProps> = ({ onOpenDeviceSettings, onNavigate
                 fontSize: '10px',
                 color:
                   notifState.statusText === 'RUNNING'
-                    ? 'var(--accent-blue)'
+                    ? 'var(--color-accent)'
                     : notifState.statusText === 'SUCCESS'
-                    ? 'var(--status-success)'
-                    : 'var(--text-muted)'
+                    ? 'var(--color-success)'
+                    : 'var(--color-text-muted)'
               }}
             >
               {notifState.statusText}
