@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace = "com.satyagrah.el06"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.satyagrah.el06"
         minSdk = 26
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0.0"
 

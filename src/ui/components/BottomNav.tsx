@@ -1,6 +1,5 @@
 import React from 'react';
-
-export type NavTab = 'home' | 'create' | 'builder' | 'workflows' | 'models' | 'activity' | 'settings';
+import { NavTab, PRIMARY_NAV_ITEMS } from '../navigation/nav-config';
 
 interface BottomNavProps {
   currentTab: NavTab;
@@ -8,63 +7,33 @@ interface BottomNavProps {
 }
 
 export const BottomNav: React.FC<BottomNavProps> = ({ currentTab, onTabChange }) => {
+  const isItemActive = (tabId: NavTab) => {
+    if (tabId === 'studio') {
+      return currentTab === 'studio' || currentTab === 'create' || currentTab === 'builder';
+    }
+    return currentTab === tabId;
+  };
+
   return (
-    <nav className="bottom-nav">
-      <button
-        className={`nav-item ${currentTab === 'home' ? 'active' : ''}`}
-        onClick={() => onTabChange('home')}
-      >
-        <div className="nav-icon" style={{ fontSize: '16px' }}>⊞</div>
-        <span>Home</span>
-      </button>
-
-      <button
-        className={`nav-item ${currentTab === 'create' ? 'active' : ''}`}
-        onClick={() => onTabChange('create')}
-      >
-        <div className="nav-icon" style={{ fontSize: '16px' }}>✦</div>
-        <span>NL Create</span>
-      </button>
-
-      <button
-        className={`nav-item ${currentTab === 'builder' ? 'active' : ''}`}
-        onClick={() => onTabChange('builder')}
-      >
-        <div className="nav-icon" style={{ fontSize: '16px' }}>☍</div>
-        <span>Visual Builder</span>
-      </button>
-
-      <button
-        className={`nav-item ${currentTab === 'workflows' ? 'active' : ''}`}
-        onClick={() => onTabChange('workflows')}
-      >
-        <div className="nav-icon" style={{ fontSize: '16px' }}>☰</div>
-        <span>Workflows</span>
-      </button>
-
-      <button
-        className={`nav-item ${currentTab === 'models' ? 'active' : ''}`}
-        onClick={() => onTabChange('models')}
-      >
-        <div className="nav-icon" style={{ fontSize: '16px' }}>⚙</div>
-        <span>Models</span>
-      </button>
-
-      <button
-        className={`nav-item ${currentTab === 'activity' ? 'active' : ''}`}
-        onClick={() => onTabChange('activity')}
-      >
-        <div className="nav-icon" style={{ fontSize: '16px' }}>⏱</div>
-        <span>Activity</span>
-      </button>
-
-      <button
-        className={`nav-item ${currentTab === 'settings' ? 'active' : ''}`}
-        onClick={() => onTabChange('settings')}
-      >
-        <div className="nav-icon" style={{ fontSize: '16px' }}>🛡</div>
-        <span>Settings</span>
-      </button>
+    <nav className="bottom-nav" aria-label="Mobile Navigation">
+      {PRIMARY_NAV_ITEMS.map((item) => {
+        const Icon = item.icon;
+        const active = isItemActive(item.id);
+        return (
+          <button
+            key={item.id}
+            type="button"
+            className={`nav-item ${active ? 'active' : ''}`}
+            onClick={() => onTabChange(item.id)}
+            aria-current={active ? 'page' : undefined}
+          >
+            <div className="nav-icon">
+              <Icon size={18} />
+            </div>
+            <span>{item.label}</span>
+          </button>
+        );
+      })}
     </nav>
   );
 };

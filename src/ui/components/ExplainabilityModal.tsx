@@ -1,4 +1,5 @@
 import React from 'react';
+import { X, Check } from 'lucide-react';
 import { ModelScoreBreakdown } from '../../types/model';
 
 interface ExplainabilityModalProps {
@@ -21,15 +22,15 @@ export const ExplainabilityModal: React.FC<ExplainabilityModalProps> = ({
       <div className="modal-dialog" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '640px' }}>
         <div className="modal-header">
           <div>
-            <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--accent-cyan)' }}>
+            <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--color-accent)' }}>
               AUTONOMOUS MODEL SELECTION
             </span>
             <h3 style={{ fontSize: '16px', fontWeight: 600, marginTop: '2px' }}>
               Why {breakdown.modelName}?
             </h3>
           </div>
-          <button className="btn-secondary" onClick={onClose} style={{ padding: '4px 8px' }}>
-            ✕
+          <button className="btn-secondary" onClick={onClose} style={{ padding: '6px' }} aria-label="Close dialog">
+            <X size={16} />
           </button>
         </div>
 
@@ -37,8 +38,8 @@ export const ExplainabilityModal: React.FC<ExplainabilityModalProps> = ({
           {/* Winner Overview Card */}
           <div
             style={{
-              background: 'var(--bg-app)',
-              border: '1px solid var(--border-default)',
+              background: 'var(--color-surface)',
+              border: '1px solid var(--color-border)',
               borderRadius: '6px',
               padding: '14px'
             }}
@@ -50,7 +51,7 @@ export const ExplainabilityModal: React.FC<ExplainabilityModalProps> = ({
                 </span>
                 <span style={{ fontWeight: 600, fontSize: '14px' }}>Selected Model</span>
               </div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '15px', color: 'var(--status-success)', fontWeight: 700 }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '15px', color: 'var(--color-success)', fontWeight: 700 }}>
                 Score: {breakdown.totalScore} / 100
               </div>
             </div>
@@ -58,8 +59,8 @@ export const ExplainabilityModal: React.FC<ExplainabilityModalProps> = ({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               {breakdown.reasons.map((reason, idx) => (
                 <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '12px' }}>
-                  <span style={{ color: 'var(--status-success)' }}>✓</span>
-                  <span style={{ color: 'var(--text-secondary)' }}>{reason}</span>
+                  <Check size={14} style={{ color: 'var(--color-success)', flexShrink: 0, marginTop: '2px' }} />
+                  <span style={{ color: 'var(--color-text-secondary)' }}>{reason}</span>
                 </div>
               ))}
             </div>

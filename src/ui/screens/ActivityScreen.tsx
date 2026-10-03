@@ -1,140 +1,271 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ExecutionHistoryStore } from '../../data/history-store';
 import { WorkflowExecutionReport } from '../../types/execution';
+import { DEMO_WORKFLOWS } from '../../data/templates';
+import { Workflow, WorkflowNode } from '../../types/workflow';
+import { ExecutionDetailView } from '../components/execution/ExecutionDetailView';
+import { StatusIndicator, Button, Input } from '../components/ui';
+import { Search, Trash2, Clock, Cpu, Zap, Activity, ArrowRight } from 'lucide-react';
 
-export const ActivityScreen: React.FC = () => {
+interface ActivityScreenProps {
+  onRunWorkflow?: (workflow: Workflow) => void;
+}
+
+function resolveWorkflowForReport(report: WorkflowExecutionReport): Workflow {
+  const found = DEMO_WORKFLOWS.find((w) => w.id === report.workflowId);
+  if (found) return found;
+
+  const nodeEntries = Object.entries(report.nodeRecords);
+  const nodes: WorkflowNode[] = nodeEntries.map(([nodeId, rec], idx) => ({
+    id: nodeId,
+    label: rec.label || `Step ${idx + 1}`,
+    type: 'AI',
+    capability: 'SUMMARIZATION',
+    inputTypes: [],
+    outputType: 'TEXT',
+    dependencies: idx > 0 ? [nodeEntries[idx - 1][0]] : [],
+    config: {},
+    executionPolicy: 'AUTO',
+    position: { x: 150 * idx, y: 150 }
+  }));
+
+  return {
+    id: report.workflowId,
+    name: report.workflowName,
+    description: `Recorded execution from ${new Date(report.startTime).toLocaleString()}`,
+    domain: 'PRODUCTIVITY',
+    createdAt: report.startTime,
+    updatedAt: report.endTime || report.startTime,
+    version: '1.0.0',
+    nodes: nodes.length > 0 ? nodes : [{
+      id: 'step_1',
+      label: 'Executed Step',
+      type: 'AI',
+      capability: 'SUMMARIZATION',
+      inputTypes: [],
+      outputType: 'TEXT',
+      dependencies: [],
+      config: {},
+      executionPolicy: 'AUTO',
+      position: { x: 0, y: 0 }
+    }],
+    edges: []
+  };
+}
+
+function formatRelativeTime(timestamp: number): string {
+  const diff = Date.now() - timestamp;
+  if (diff < 60000) return 'Just now';
+  if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+  if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
+  return new Date(timestamp).toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+
+function formatDuration(ms?: number): string {
+  if (!ms && ms !== 0) return '—';
+  if (ms < 1000) return `${ms}ms`;
+  return `${(ms / 1000).toFixed(1)}s`;
+}
+
+export const ActivityScreen: React.FC<ActivityScreenProps> = ({ onRunWorkflow }) => {
   const store = ExecutionHistoryStore.getInstance();
   const [reports, setReports] = useState<WorkflowExecutionReport[]>(store.getAll());
   const [selectedReport, setSelectedReport] = useState<WorkflowExecutionReport | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'COMPLETED' | 'FAILED'>('ALL');
 
   useEffect(() => {
     return store.subscribe(setReports);
   }, []);
 
+  const filteredReports = useMemo(() => {
+    return reports.filter((rep) => {
+      const matchesSearch =
+        searchQuery === '' ||
+        rep.workflowName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        rep.status.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchesStatus =
+        statusFilter === 'ALL' || rep.status === statusFilter;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [reports, searchQuery, statusFilter]);
+
+  // If a report is selected, show the unified ExecutionDetailView
+  if (selectedReport) {
+    const wf = resolveWorkflowForReport(selectedReport);
+    return (
+      <ExecutionDetailView
+        workflow={wf}
+        report={selectedReport}
+        onBack={() => setSelectedReport(null)}
+        isLiveMode={false}
+        onReExecute={onRunWorkflow ? () => onRunWorkflow(wf) : undefined}
+      />
+    );
+  }
+
   return (
-    <div>
-      <div className="section-header">
+    <div className="el-activity-screen">
+      {/* Header */}
+      <div className="el-activity-header">
         <div>
-          <h2 style={{ fontSize: '18px', fontWeight: 600 }}>Execution Activity & Audit Trail</h2>
-          <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-            Persistent telemetry, latency logs, model assignments, and cache efficiency metrics.
+          <h1 className="el-activity-title">Execution Activity</h1>
+          <p className="el-activity-subtitle">
+            Auditable history of all automation runs with execution telemetry, model delegates, and timing.
           </p>
         </div>
 
         {reports.length > 0 && (
-          <button className="btn-secondary" style={{ fontSize: '11px' }} onClick={() => store.clear()}>
+          <Button
+            variant="ghost"
+            size="sm"
+            leftIcon={<Trash2 size={13} aria-hidden="true" />}
+            onClick={() => store.clear()}
+          >
             Clear History
-          </button>
+          </Button>
         )}
       </div>
 
-      {reports.length === 0 ? (
-        <div style={{ background: 'var(--bg-surface-1)', border: '1px solid var(--border-default)', borderRadius: '8px', padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
-          No workflow runs recorded yet. Execute any automation from the Home or Visual Builder screen.
+      {/* Filter & Search Controls */}
+      <div className="el-activity-controls">
+        <div className="el-activity-search">
+          <Input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by workflow name or status..."
+            leftIcon={<Search size={14} aria-hidden="true" />}
+            aria-label="Search execution logs"
+          />
+        </div>
+
+        <div className="el-activity-filters" role="tablist" aria-label="Filter execution status">
+          {(['ALL', 'COMPLETED', 'FAILED'] as const).map((filter) => {
+            const count =
+              filter === 'ALL'
+                ? reports.length
+                : reports.filter((r) => r.status === filter).length;
+            const isActive = statusFilter === filter;
+
+            return (
+              <button
+                key={filter}
+                role="tab"
+                aria-selected={isActive}
+                className={`el-activity-filter-btn ${isActive ? 'el-activity-filter-btn--active' : ''}`}
+                onClick={() => setStatusFilter(filter)}
+              >
+                <span>{filter === 'ALL' ? 'All Runs' : filter === 'COMPLETED' ? 'Successful' : 'Failed'}</span>
+                <span className="el-activity-filter-count">{count}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Reports List */}
+      {filteredReports.length === 0 ? (
+        <div className="el-activity-empty">
+          <Activity size={32} className="el-activity-empty__icon" aria-hidden="true" />
+          <h3 className="el-activity-empty__title">
+            {reports.length === 0 ? 'No Execution History Yet' : 'No Matching Runs Found'}
+          </h3>
+          <p className="el-activity-empty__desc">
+            {reports.length === 0
+              ? 'Run an automation from the Library or Studio to view result summaries and execution telemetry.'
+              : 'Try adjusting your search query or status filter.'}
+          </p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {reports.map((rep) => {
-            const dateStr = new Date(rep.startTime).toLocaleTimeString();
+        <div className="el-activity-list" role="feed" aria-label="Execution history">
+          {filteredReports.map((rep) => {
             const nodeCount = Object.keys(rep.nodeRecords).length;
+            const badgeStatus =
+              rep.status === 'COMPLETED'
+                ? 'success'
+                : rep.status === 'FAILED'
+                ? 'error'
+                : 'running';
 
             return (
               <div
                 key={rep.id}
-                style={{
-                  background: 'var(--bg-surface-1)',
-                  border: '1px solid var(--border-default)',
-                  borderRadius: '8px',
-                  padding: '16px',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  flexWrap: 'wrap',
-                  gap: '14px'
+                className="el-activity-card"
+                onClick={() => setSelectedReport(rep)}
+                role="article"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setSelectedReport(rep);
+                  }
                 }}
+                aria-label={`Execution of ${rep.workflowName}, status ${rep.status}`}
               >
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <span
-                      className="status-pill"
-                      style={{
-                        color:
-                          rep.status === 'COMPLETED'
-                            ? 'var(--status-success)'
-                            : rep.status === 'FAILED'
-                            ? 'var(--status-error)'
-                            : 'var(--accent-blue)',
-                        fontWeight: 600
-                      }}
-                    >
-                      {rep.status}
-                    </span>
-                    <span style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)' }}>
-                      {rep.workflowName}
+                {/* Left: Status & Identity */}
+                <div className="el-activity-card__left">
+                  <div className="el-activity-card__status-row">
+                    <StatusIndicator
+                      status={badgeStatus}
+                      label={rep.status}
+                      size="sm"
+                    />
+                    <span className="el-activity-card__time">
+                      {formatRelativeTime(rep.startTime)}
                     </span>
                   </div>
 
-                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                    Ran at {dateStr} | {nodeCount} DAG nodes | Device: {rep.deviceContextSnapshot.deviceModel}
+                  <h3 className="el-activity-card__name">{rep.workflowName}</h3>
+
+                  <div className="el-activity-card__meta">
+                    <span>{nodeCount} steps</span>
+                    <span>•</span>
+                    <span>{rep.deviceContextSnapshot?.deviceModel || 'Android Runtime'}</span>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                  <div className="stat-item">
-                    <span className="stat-label">Duration</span>
-                    <span className="stat-value">{rep.totalDurationMs}ms</span>
+                {/* Right: Telemetry & Drilldown */}
+                <div className="el-activity-card__right">
+                  <div className="el-activity-card__stats">
+                    <div className="el-activity-card__stat">
+                      <Clock size={11} aria-hidden="true" />
+                      <span className="el-activity-card__stat-val">
+                        {formatDuration(rep.totalDurationMs)}
+                      </span>
+                    </div>
+
+                    <div className="el-activity-card__stat">
+                      <Cpu size={11} aria-hidden="true" />
+                      <span className="el-activity-card__stat-val">
+                        {rep.totalMemoryPeakMb || 0} MB
+                      </span>
+                    </div>
+
+                    {rep.cacheHitsCount !== undefined && rep.cacheHitsCount > 0 && (
+                      <div className="el-activity-card__stat el-activity-card__stat--cache">
+                        <Zap size={11} aria-hidden="true" />
+                        <span className="el-activity-card__stat-val">
+                          {rep.cacheHitsCount} cache hit{rep.cacheHitsCount > 1 ? 's' : ''}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
-                  <div className="stat-item">
-                    <span className="stat-label">Peak RAM</span>
-                    <span className="stat-value" style={{ color: 'var(--accent-cyan)' }}>
-                      {rep.totalMemoryPeakMb} MB
-                    </span>
+                  <div className="el-activity-card__action">
+                    <span className="el-activity-card__view-text">View Result</span>
+                    <ArrowRight size={14} aria-hidden="true" />
                   </div>
-
-                  <div className="stat-item">
-                    <span className="stat-label">Cache Hits</span>
-                    <span className="stat-value" style={{ color: '#34d399' }}>
-                      {rep.cacheHitsCount}
-                    </span>
-                  </div>
-
-                  <button
-                    className="btn-secondary"
-                    style={{ fontSize: '12px' }}
-                    onClick={() => setSelectedReport(rep)}
-                  >
-                    View Audit Log
-                  </button>
                 </div>
               </div>
             );
           })}
-        </div>
-      )}
-
-      {/* Execution Audit Modal */}
-      {selectedReport && (
-        <div className="modal-backdrop" onClick={() => setSelectedReport(null)}>
-          <div className="modal-dialog" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '780px' }}>
-            <div className="modal-header">
-              <div>
-                <span className="stat-label">AUDIT TELEMETRY REPORT</span>
-                <h3 style={{ fontSize: '16px', fontWeight: 600 }}>{selectedReport.workflowName}</h3>
-              </div>
-              <button className="btn-secondary" onClick={() => setSelectedReport(null)}>✕</button>
-            </div>
-
-            <div className="modal-body">
-              <pre className="code-view" style={{ maxHeight: '520px' }}>
-                {JSON.stringify(selectedReport, null, 2)}
-              </pre>
-            </div>
-
-            <div className="modal-footer">
-              <button className="btn-secondary" onClick={() => setSelectedReport(null)}>Close</button>
-            </div>
-          </div>
         </div>
       )}
     </div>

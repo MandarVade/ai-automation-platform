@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { X, Rocket, Smartphone, AlertTriangle } from 'lucide-react';
 import { DeviceContextManager } from '../../core/resources/device-context';
 import { DeviceContext, ThermalStatus, NetworkState } from '../../types/device';
 
@@ -29,8 +30,8 @@ export const DeviceResourceModal: React.FC<DeviceResourceModalProps> = ({ isOpen
               Test autonomous model selection, routing, and fallbacks under edge constraints.
             </p>
           </div>
-          <button className="btn-secondary" onClick={onClose} style={{ padding: '4px 8px' }}>
-            ✕
+          <button className="btn-secondary" onClick={onClose} style={{ padding: '6px' }} aria-label="Close dialog">
+            <X size={16} />
           </button>
         </div>
 
@@ -41,33 +42,36 @@ export const DeviceResourceModal: React.FC<DeviceResourceModalProps> = ({ isOpen
             <div style={{ display: 'flex', gap: '8px', marginTop: '6px', flexWrap: 'wrap' }}>
               <button
                 className="btn-secondary"
-                style={{ fontSize: '11px' }}
+                style={{ fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 onClick={() => {
                   manager.presetNominalHighEnd();
                   setContext(manager.getContext());
                 }}
               >
-                🚀 Flagship (Pixel 8 / NPU / 12GB)
+                <Rocket size={13} style={{ color: 'var(--color-accent)' }} />
+                <span>Flagship (Pixel 8 / NPU / 12GB)</span>
               </button>
               <button
                 className="btn-secondary"
-                style={{ fontSize: '11px' }}
+                style={{ fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 onClick={() => {
                   manager.presetBudgetConstrained();
                   setContext(manager.getContext());
                 }}
               >
-                📱 Budget Device (4GB RAM / Metered)
+                <Smartphone size={13} style={{ color: 'var(--color-text-secondary)' }} />
+                <span>Budget Device (4GB RAM / Metered)</span>
               </button>
               <button
                 className="btn-secondary"
-                style={{ fontSize: '11px' }}
+                style={{ fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 onClick={() => {
                   manager.presetOfflineLowBattery();
                   setContext(manager.getContext());
                 }}
               >
-                ⚠️ Offline Critical (14% Bat / Severe)
+                <AlertTriangle size={13} style={{ color: 'var(--color-warning)' }} />
+                <span>Offline Critical (14% Bat / Severe)</span>
               </button>
             </div>
           </div>
