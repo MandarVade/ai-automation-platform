@@ -460,4 +460,48 @@ Phase 7 restructures the execution and activity monitor around a **result-first 
   - Status filter tabs (`All Runs`, `Successful`, `Failed`) with live record counts.
   - High-density activity cards displaying relative execution timestamps, step counts, duration, RAM usage, and cache hit metrics.
 
+---
+
+## 17. Models & Settings Surfaces (Phase 8)
+
+### Architectural Intent
+Models and Settings are supporting technical control surfaces in the secondary product hierarchy. They provide deep, transparent inspectability and runtime configuration without competing visually or conceptually with the primary workflow builder (Studio) or library (Workflows).
+
+### Models Catalog (`src/ui/components/models/`)
+- **`ModelCard` (`ModelCard.tsx`)**:
+  - Standardized technical card representing an individual registered model from `ModelRegistry`.
+  - Visual grammar:
+    - Top header: Capability category badge (with Lucide icon from `node-presentation-registry`), execution location badge (`On-device`, `Cloud API`, `On-device + Cloud`), quantization chip (`INT8`, `FP16`), and package size in MB.
+    - Identity: Model name and version tag.
+    - I/O Contract: Clean arrow notation (`IMAGE → TEXT`, `AUDIO_STREAM → TEXT`).
+    - Description: Concise purpose summary.
+    - Performance Metrics Strip: Expected latency in `JetBrains Mono` (e.g., `~320ms`), RAM requirement (e.g., `65 MB`), and quality benchmark percentage (e.g., `81%`).
+    - Memory Lifecycle Status: Real-time resident RAM allocation state via `StatusIndicator` (`Active in RAM` vs `Idle in Storage`) and supported hardware delegates (`NNAPI`, `GPU_VULKAN`, `CPU`).
+    - Actions: Deep explainability trigger (`Why this model? ↗`), manual selection/pinning (`Select` / `Selected`), memory allocation toggle (`Preload` / `Unload`), and detail inspector (`Inspect Spec`).
+- **`ModelDetailSheet` (`ModelDetailSheet.tsx`)**:
+  - Progressive disclosure drawer implemented using the design system `Sheet` primitive.
+  - Hardware & Performance Profile grid: RAM requirement, expected latency, quality score, package size, quantization, battery impact, parameters count, and supported delegates.
+  - Memory Allocation Status: Live allocation toggle allowing manual memory preload/unload with instant memory budget recalculation.
+  - Collapsible Raw Specification: Toggable `model-spec.json` preview with one-click clipboard copying.
+- **`ModelRegistryScreen` (`ModelRegistryScreen.tsx`)**:
+  - Technical catalog view with compact header and active memory budget tracker (`X MB / 2048 MB budget`).
+  - Automatic execution policy rationale callout explaining dynamic scoring based on thermal, battery, and memory state.
+  - Fast search input filtering across model names, capabilities, delegates, and architectures.
+  - Capability selector dropdown and execution target filter tabs (`All`, `On-Device`, `Cloud`).
+  - Dynamic `ExplainabilityModal` integration displaying genuine multi-factor compatibility scores.
+
+### Settings Control Panel (`src/ui/components/settings/`)
+- **`SettingsSection` (`SettingsSection.tsx`)**:
+  - Reusable card container standardizing settings visual grammar with section icon, title, description, and optional header action.
+- **`SettingsToggle` (`SettingsToggle.tsx`)**:
+  - Accessible toggle switch meeting WAI-ARIA guidelines (`role="switch"`, `aria-checked`), complete with title, explanatory description, and status badge.
+- **`SettingsScreen` (`SettingsScreen.tsx`)**:
+  - Structured 5-section control panel:
+    1. **Data Privacy & Cloud Boundary**: Explicit toggle for `allowCloudInference` with unambiguous local data boundary implications and live network connectivity status.
+    2. **Model Lifecycle & Active Memory**: Progress bar tracking active weights against mobile RAM budget (2048 MB), list of currently resident models with individual unload triggers, and destructive `Unload All` dialog with explicit confirmation.
+    3. **Deterministic Intermediate Result Cache**: Live cache telemetry (cached entries, hits, misses, hit ratio percentage), explicit cache key structure (`workflowId::nodeId::inputHash::modelVersion::parameters`), and destructive `Clear Cache` dialog with explicit confirmation.
+    4. **Runtime Hardware Simulation & Constraints**: One-touch hardware presets (`Pixel 8 Pro (NPU)`, `Budget (4GB RAM)`, `Offline Field Device`), power saver toggle, battery percentage/charging indicator, and thermal status.
+    5. **Platform & System Information**: Definition-list grid rendering actual device context (OS, target device, RAM capacity, hardware acceleration, CPU cores, runtime version) and project attribution.
+
+
 
