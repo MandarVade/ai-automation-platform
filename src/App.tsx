@@ -5,6 +5,7 @@ import { BottomNav } from './ui/components/BottomNav';
 import { DeviceResourceModal } from './ui/components/DeviceResourceModal';
 import { HomeScreen } from './ui/screens/HomeScreen';
 import { StudioScreen } from './ui/screens/StudioScreen';
+import { WorkflowsScreen } from './ui/screens/WorkflowsScreen';
 import { ExecutionMonitorScreen } from './ui/screens/ExecutionMonitorScreen';
 import { WorkflowDetailScreen } from './ui/screens/WorkflowDetailScreen';
 import { ModelRegistryScreen } from './ui/screens/ModelRegistryScreen';
@@ -128,36 +129,14 @@ export const App: React.FC = () => {
 
             {currentTab === 'workflows' && (
               <PageContainer width="wide">
-                <PageHeader
-                  title="Workflow Library"
-                  description="Pre-configured and user-defined multi-step AI automations."
+                <WorkflowsScreen
+                  workflows={DEMO_WORKFLOWS}
+                  onOpenWorkflow={handleEditInVisualBuilder}
+                  onRunWorkflow={handleRunWorkflow}
+                  onCreateWorkflow={() => {
+                    handleStartNLPlan('');
+                  }}
                 />
-
-                <div className="card-grid">
-                  {DEMO_WORKFLOWS.map((wf) => (
-                    <div key={wf.id} className="workflow-card">
-                      <div>
-                        <div className="card-top">
-                          <span className={`card-domain-badge ${wf.domain}`}>{wf.domain}</span>
-                          <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
-                            v{wf.version}
-                          </span>
-                        </div>
-                        <div className="card-name">{wf.name}</div>
-                        <div className="card-desc">{wf.description}</div>
-                      </div>
-
-                      <div className="card-actions">
-                        <button className="btn-secondary" onClick={() => handleSelectWorkflow(wf)}>
-                          View Details
-                        </button>
-                        <button className="btn-primary" onClick={() => handleRunWorkflow(wf)}>
-                          ▶ Run
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
               </PageContainer>
             )}
 

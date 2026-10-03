@@ -2782,6 +2782,326 @@ pre, code {
   }
 }
 
+/* ==========================================================================
+   Phase 6: Reusable Workflow Library & WorkflowCard System
+   ========================================================================== */
+
+.el-workflows-screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding-bottom: var(--space-8);
+}
+
+/* Library Controls (Search + Filters) */
+.el-library-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.el-library-search {
+  max-width: 520px;
+  position: relative;
+}
+
+.el-search-clear-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  transition: color 0.15s ease;
+}
+
+.el-search-clear-btn:hover {
+  color: var(--color-text-primary);
+}
+
+.el-library-filter-pills {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.el-library-filter-pill {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.el-library-filter-pill:hover {
+  border-color: var(--color-border-strong);
+  color: var(--color-text-primary);
+}
+
+.el-library-filter-pill--active {
+  background-color: var(--color-accent-soft);
+  border-color: var(--color-accent) !important;
+  color: var(--color-accent-hover) !important;
+  font-weight: 600;
+}
+
+.el-library-filter-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: -8px;
+}
+
+.el-library-clear-btn {
+  font-size: 11px !important;
+  padding: 2px 6px !important;
+  height: auto !important;
+  color: var(--color-accent) !important;
+}
+
+/* Workflow Cards Grid */
+.el-workflow-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: var(--space-4);
+}
+
+@media (max-width: 768px) {
+  .el-workflow-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Workflow Card */
+.el-workflow-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: border-color 0.15s ease;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.el-workflow-card:hover {
+  border-color: var(--color-border-strong);
+}
+
+.el-workflow-card__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.el-workflow-card__meta-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.el-workflow-card__domain {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.el-workflow-card__version {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--color-text-muted);
+}
+
+.el-workflow-card__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  line-height: 1.3;
+}
+
+.el-workflow-card__desc {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.el-workflow-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  flex: 1;
+}
+
+/* Workflow Preview */
+.el-workflow-card__preview-section {
+  background-color: var(--color-surface-secondary);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  overflow: hidden;
+}
+
+.el-workflow-preview {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.el-workflow-preview--empty {
+  padding: 8px;
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-family: var(--font-mono);
+  justify-content: center;
+}
+
+.el-workflow-preview__track {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  width: 100%;
+}
+
+.el-workflow-preview__track::-webkit-scrollbar {
+  display: none;
+}
+
+.el-workflow-preview__node {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
+  padding: 4px 8px;
+  flex-shrink: 0;
+  max-width: 160px;
+}
+
+.el-workflow-preview__node-icon {
+  color: var(--color-accent);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.el-workflow-preview__node-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.el-workflow-preview__connector {
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.el-workflow-preview__overflow-badge {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--color-text-muted);
+  background-color: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Capability Summary & Status */
+.el-workflow-card__capabilities {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 11px;
+}
+
+.el-workflow-card__cap-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+}
+
+.el-workflow-card__cap-list {
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.el-workflow-card__status-row {
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+/* Card Actions Footer */
+.el-workflow-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+/* Empty States */
+.el-library-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-12) var(--space-6);
+  background-color: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  max-width: 480px;
+  margin: var(--space-8) auto;
+  gap: var(--space-3);
+}
+
+.el-library-empty__icon {
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
+}
+
+.el-library-empty__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.el-library-empty__desc {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.45;
+  margin-bottom: var(--space-2);
+}
+
+
 
 
 

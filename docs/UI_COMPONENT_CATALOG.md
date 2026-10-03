@@ -382,3 +382,34 @@ Phase 5 formalizes ONE reusable, consistent workflow node architecture that ever
   - **Dependencies**: Lists upstream predecessor node IDs.
   - **Actions**: Accessible buttons for duplicating or deleting the active node.
 
+---
+
+## 15. Workflow Library & WorkflowCard System (Phase 6)
+
+Phase 6 rebuilds the Workflows destination as the reusable automation library for EL-06, maintaining a clean architectural separation between library discovery, Studio authoring, and Activity audit logging.
+
+### Core Components
+
+- **`WorkflowsScreen` (`WorkflowsScreen.tsx`)**:
+  - Full-screen library container using `PageContainer width="wide"`.
+  - **Header**: Standard `PageHeader` with title, subtitle, and primary `New Workflow` action opening Studio.
+  - **Client-Side Search**: Live search filtering across workflow names, descriptions, and underlying node capabilities/labels. Includes clear button.
+  - **Domain Filters**: Pill-based category filtering (`All Automations`, `Finance`, `Education`, `Healthcare`, `Productivity`) with active count and reset action.
+  - **Responsive Grid**: Adaptive layout rendering 1 column on mobile (≤768px), 2 columns on tablet, and 3 columns on desktop (≥1024px).
+  - **Empty States**: Distinct, accessible empty states for zero library workflows vs no search/filter matches.
+
+- **`WorkflowCard` (`WorkflowCard.tsx`)**:
+  - Reusable card component adhering to the EL-06 Obsidian design system (`--color-surface`, 10px radius, 1px border, burnt-orange accents).
+  - **Header**: Domain badge (`Badge variant="neutral"`), version and step count in `JetBrains Mono`, primary workflow title, and 2-line clamped description.
+  - **Preview Slot**: Houses `WorkflowPreview` providing immediate visual recognition of the DAG pipeline.
+  - **Capability Summary**: Compact, intelligent summary of unique capabilities (e.g. `Camera · OCR · Calculation · +2 more`).
+  - **Execution Status**: Real-time integration with `ExecutionHistoryStore` rendering relative timestamp and semantic status (`Completed`, `Failed`, `Running`, or `Not run yet`).
+  - **Action Footer**: Subordinate secondary `Open` button (enters Studio) and primary `Run` button (triggers execution handoff).
+
+- **`WorkflowPreview` (`WorkflowPreview.tsx`)**:
+  - Lightweight, non-editable read-only DAG preview visualizer.
+  - Derives topological execution sequence directly from workflow nodes and edges.
+  - Renders miniature node shells with Lucide icons from `node-presentation-registry` and directional `ArrowRight` connectors.
+  - Features horizontal scroll track with smooth overflowing and overflow badge (`+N more`).
+  - Non-draggable, zero-overhead, completely accessible with ARIA description of the pipeline.
+
