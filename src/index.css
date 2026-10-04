@@ -2067,7 +2067,7 @@ pre, code {
 }
 
 /* ==========================================================================
-   EL-06 Home Experience (Phase 11 Refinement)
+   EL-06 Home Experience (Phase 11B Refinement)
    ========================================================================== */
 
 .el-home {
@@ -2122,7 +2122,347 @@ pre, code {
   overflow-wrap: break-word;
 }
 
-/* 2. Natural-Language Creation Input Card */
+/* 2. Interactive EL-06 Product Story & Visualization */
+.el-home__story-section {
+  width: 100%;
+  min-width: 0;
+}
+
+.el-story {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  box-sizing: border-box;
+}
+
+.el-story__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.el-story__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-accent);
+}
+
+.el-story__eyebrow-icon {
+  color: var(--color-accent);
+}
+
+.el-story__title {
+  font-family: var(--font-sans);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  letter-spacing: -0.015em;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+.el-story__subtitle {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+  max-width: 620px;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+/* Pipeline Stages Row */
+.el-story__pipeline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.el-story__stage-card {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  background-color: var(--color-surface-secondary);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  cursor: pointer;
+  outline: none;
+  overflow: hidden;
+  box-sizing: border-box;
+  transition: border-color var(--motion-duration-micro, 0.14s) ease,
+              background-color var(--motion-duration-micro, 0.14s) ease;
+}
+
+.el-story__stage-card:hover {
+  border-color: var(--color-border-strong);
+  background-color: var(--color-surface-elevated);
+}
+
+.el-story__stage-card:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.el-story__stage-card--active {
+  border-color: var(--color-accent);
+  background-color: var(--color-surface-elevated);
+}
+
+/* Subtle top burnt-orange accent line on active stage */
+.el-story__stage-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--color-accent);
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--motion-duration-standard, 0.22s) cubic-bezier(0.16, 1, 0.3, 1),
+              opacity var(--motion-duration-standard, 0.22s) ease;
+}
+
+.el-story__stage-card--active .el-story__stage-indicator {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.el-story__stage-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.el-story__stage-step {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.el-story__stage-card--active .el-story__stage-step {
+  color: var(--color-accent);
+}
+
+.el-story__stage-icon {
+  color: var(--color-text-muted);
+}
+
+.el-story__stage-card--active .el-story__stage-icon {
+  color: var(--color-accent);
+}
+
+.el-story__stage-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.el-story__stage-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.el-story__stage-headline {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.el-story__stage-card--active .el-story__stage-headline {
+  color: var(--color-text-secondary);
+}
+
+/* Connecting arrows */
+.el-story__connector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.el-story__connector--desktop {
+  display: flex;
+}
+
+.el-story__connector--mobile {
+  display: none;
+}
+
+.el-story__connector-arrow {
+  color: var(--color-border-strong);
+}
+
+/* Active Stage Detail & Transformation Viewport */
+.el-story__detail-card {
+  background-color: var(--color-surface-secondary);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.el-story__detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.el-story__detail-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.el-story__detail-step {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  background-color: var(--color-accent-soft);
+  color: var(--color-accent);
+  border: 1px solid var(--color-accent-border);
+  border-radius: var(--radius-xs);
+}
+
+.el-story__detail-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.el-story__detail-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+  word-break: break-word;
+}
+
+.el-story__detail-desc {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+  margin: 0;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+/* Concrete Transformation Preview Box */
+.el-story__preview-box {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.el-story__preview-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-accent);
+}
+
+.el-story__preview-icon {
+  color: var(--color-accent);
+}
+
+.el-story__preview-content {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.el-story__detail-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.el-story__status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 11px;
+  color: var(--color-success);
+}
+
+.el-story__status-icon {
+  color: var(--color-success);
+}
+
+.el-story__hint {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+/* 3. Primary Working Area ("Build Your Automation") */
+.el-home__working-section {
+  width: 100%;
+  min-width: 0;
+}
+
+.el-home__working-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  letter-spacing: -0.015em;
+  margin: 0;
+}
+
 .el-home__input-section {
   width: 100%;
   min-width: 0;
@@ -2229,7 +2569,7 @@ pre, code {
   overflow-wrap: break-word;
 }
 
-/* 3. Example Prompts Grid */
+/* 4. Example Prompts Grid */
 .el-home__examples-section {
   width: 100%;
   min-width: 0;
@@ -2275,84 +2615,6 @@ pre, code {
   line-height: 1.5;
   color: var(--color-text-secondary);
   margin-top: 4px;
-  word-break: break-word;
-  overflow-wrap: break-word;
-}
-
-/* 4. "How It Works" Section */
-.el-home__how-it-works {
-  width: 100%;
-  min-width: 0;
-}
-
-.el-home__steps-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-3);
-  width: 100%;
-  min-width: 0;
-}
-
-.el-home__step-card {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-sm);
-  padding: var(--space-4);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  min-width: 0;
-  box-sizing: border-box;
-  transition: border-color var(--motion-duration-micro, 0.14s) ease;
-}
-
-.el-home__step-card:hover {
-  border-color: var(--color-border-strong);
-}
-
-.el-home__step-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.el-home__step-number {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-accent);
-}
-
-.el-home__step-icon {
-  color: var(--color-text-muted);
-}
-
-.el-home__step-body {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-}
-
-.el-home__step-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-text-primary);
-}
-
-.el-home__step-subtitle {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  word-break: break-word;
-  overflow-wrap: break-word;
-}
-
-.el-home__step-desc {
-  font-size: 12px;
-  line-height: 1.45;
-  color: var(--color-text-muted);
-  margin-top: 2px;
   word-break: break-word;
   overflow-wrap: break-word;
 }
@@ -2443,11 +2705,14 @@ pre, code {
   .el-home__examples-grid {
     grid-template-columns: 1fr;
   }
-  .el-home__steps-grid {
-    grid-template-columns: 1fr;
-  }
   .el-home__trust-grid {
     grid-template-columns: 1fr;
+  }
+  .el-story {
+    padding: var(--space-4);
+  }
+  .el-story__stage-headline {
+    display: none;
   }
 }
 
@@ -2467,6 +2732,53 @@ pre, code {
     font-size: 13px;
     line-height: 1.5;
   }
+  
+  /* Story mobile vertical stepper */
+  .el-story {
+    padding: var(--space-3);
+    gap: var(--space-3);
+  }
+  .el-story__pipeline {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-1);
+  }
+  .el-story__connector--desktop {
+    display: none;
+  }
+  .el-story__connector--mobile {
+    display: flex;
+    justify-content: center;
+    padding: 2px 0;
+  }
+  .el-story__stage-card {
+    padding: var(--space-2) var(--space-3);
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .el-story__stage-top {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .el-story__stage-meta {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .el-story__stage-headline {
+    display: none;
+  }
+  .el-story__detail-card {
+    padding: var(--space-3);
+  }
+  .el-story__hint {
+    display: none;
+  }
+
+  /* Primary working area mobile layout */
   .el-home__input-box {
     padding: var(--space-3);
   }
@@ -2501,7 +2813,6 @@ pre, code {
     font-size: 24px;
     letter-spacing: -0.02em;
   }
-  .el-home__step-card,
   .el-home__input-box {
     padding: var(--space-3);
   }

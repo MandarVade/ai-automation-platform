@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { motion, useReducedMotion } from 'motion/react';
 import { MOTION_DURATIONS, MOTION_EASINGS } from '../motion/motion-tokens';
+import { InteractiveWorkflowStory, STORY_STAGES, StoryStage } from '../components/home/InteractiveWorkflowStory';
 
 export interface HomeScreenProps {
   device: DeviceContext;
@@ -55,29 +56,8 @@ export const EXAMPLE_AUTOMATIONS: ExampleAutomation[] = [
   },
 ];
 
-export const HOW_IT_WORKS_STEPS = [
-  {
-    step: '01',
-    title: 'Describe',
-    subtitle: 'Tell EL-06 what you want.',
-    description: 'Type your task in plain words. No code, manual triggers, or graph syntax required.',
-    icon: MessageSquareText,
-  },
-  {
-    step: '02',
-    title: 'Build',
-    subtitle: 'The platform turns intent into a workflow.',
-    description: 'Your intent is compiled into a verified dependency DAG with on-device model routing.',
-    icon: Layers,
-  },
-  {
-    step: '03',
-    title: 'Run',
-    subtitle: 'Inspect it, edit it, and execute it.',
-    description: 'Inspect the DAG, adjust node parameters, and run deterministically on Android hardware.',
-    icon: Play,
-  },
-];
+// Preserved for backwards compatibility with tests and domain specs
+export const HOW_IT_WORKS_STEPS = STORY_STAGES;
 
 export const CAPABILITY_PILLARS = [
   {
@@ -178,13 +158,23 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </h1>
 
         <p className="el-home__subheadline">
-          Tell EL-06 what you want to automate. It compiles your natural language intent into an
-          executable on-device workflow you can inspect, edit, and run.
+          Tell EL-06 what you want to automate. It turns your intent into a workflow you can inspect,
+          edit, and run directly on your device.
         </p>
       </motion.section>
 
-      {/* 2. Primary Workflow Input Card */}
-      <motion.section className="el-home__input-section" variants={itemVariants}>
+      {/* 2. Interactive EL-06 Product Story & Visualization */}
+      <motion.section className="el-home__story-section" variants={itemVariants}>
+        <InteractiveWorkflowStory />
+      </motion.section>
+
+      {/* 3. Primary Working Area (Transition heading + Prompt Input Card) */}
+      <motion.section className="el-home__working-section el-home__input-section" variants={itemVariants}>
+        <div className="el-home__section-label">
+          <span className="el-home__section-eyebrow">Build Your Automation</span>
+          <h2 className="el-home__working-title">Start with what you want to automate</h2>
+        </div>
+
         <form onSubmit={handleSubmit} className="el-home__form">
           <div
             className={`el-home__input-box ${isFocused ? 'el-home__input-box--focused' : ''}`}
@@ -249,7 +239,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </form>
       </motion.section>
 
-      {/* 3. Example Automations */}
+      {/* 4. Example Automations */}
       <motion.section className="el-home__examples-section" variants={itemVariants}>
         <div className="el-home__section-label">
           <span>Example Automations</span>
@@ -292,34 +282,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </div>
       </motion.section>
 
-      {/* 4. "How It Works" Section */}
-      <motion.section className="el-home__how-it-works" variants={itemVariants}>
-        <div className="el-home__section-label">
-          <span>How It Works</span>
-          <span className="el-home__section-sublabel">From natural language intent to executable on-device DAG</span>
-        </div>
-
-        <div className="el-home__steps-grid">
-          {HOW_IT_WORKS_STEPS.map((s) => {
-            const Icon = s.icon;
-            return (
-              <div key={s.step} className="el-home__step-card">
-                <div className="el-home__step-top">
-                  <span className="el-home__step-number">{s.step}</span>
-                  <Icon size={16} className="el-home__step-icon" />
-                </div>
-                <div className="el-home__step-body">
-                  <h3 className="el-home__step-title">{s.title}</h3>
-                  <p className="el-home__step-subtitle">{s.subtitle}</p>
-                  <p className="el-home__step-desc">{s.description}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </motion.section>
-
-      {/* 5. Minimal Capability / Trust Architecture */}
+      {/* 5. Minimal Supporting Proof / Trust Architecture */}
       <motion.section className="el-home__trust-section" variants={itemVariants}>
         <div className="el-home__trust-grid">
           {CAPABILITY_PILLARS.map((item) => {

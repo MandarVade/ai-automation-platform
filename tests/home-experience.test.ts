@@ -20,7 +20,7 @@ describe('Phase 11 — Home Page Refinement & Mobile Hardening', () => {
         onOpenVisualBuilder: vi.fn(),
         ...props,
       })
-    );
+    ).replace(/&amp;/g, '&');
   };
 
   describe('1. Information Architecture & Copywriting', () => {
@@ -34,7 +34,7 @@ describe('Phase 11 — Home Page Refinement & Mobile Hardening', () => {
     it('answers product purpose with credible, non-marketing explanation', () => {
       const html = renderHome();
       expect(html).toContain('Tell EL-06 what you want to automate');
-      expect(html).toContain('executable on-device workflow you can inspect, edit, and run');
+      expect(html).toContain('turns your intent into a workflow you can inspect, edit, and run');
 
       // Prohibited generic AI hype checks
       expect(html).not.toContain('unlock the power of AI');
@@ -44,20 +44,25 @@ describe('Phase 11 — Home Page Refinement & Mobile Hardening', () => {
       expect(html).not.toContain('transform your productivity');
     });
 
-    it('renders the 3-step "How It Works" section (01 Describe, 02 Build, 03 Run)', () => {
+    it('renders the 4-stage interactive product story (01 Describe, 02 Build, 03 Route, 04 Run)', () => {
       const html = renderHome();
-      expect(html).toContain('How It Works');
+      expect(html).toContain('How EL-06 Works');
+      expect(html).toContain('From intent to executable automation');
       expect(html).toContain('01');
       expect(html).toContain('Describe');
       expect(html).toContain('02');
       expect(html).toContain('Build');
       expect(html).toContain('03');
+      expect(html).toContain('Route');
+      expect(html).toContain('04');
       expect(html).toContain('Run');
 
       HOW_IT_WORKS_STEPS.forEach((step) => {
-        expect(html).toContain(step.title);
-        expect(html).toContain(step.subtitle);
+        expect(html).toContain(step.name);
+        expect(html).toContain(step.headline);
       });
+      // Initial active stage description is rendered in detail viewport
+      expect(html).toContain(HOW_IT_WORKS_STEPS[0].description);
     });
 
     it('renders minimal, technically grounded trust pillars', () => {
@@ -69,7 +74,42 @@ describe('Phase 11 — Home Page Refinement & Mobile Hardening', () => {
     });
   });
 
-  describe('2. Primary Workflow Input & CTAs', () => {
+  describe('2. Interactive EL-06 Product Story Component (Phase 11B)', () => {
+    it('provides accessible tablist navigation across the four conceptual stages', () => {
+      const html = renderHome();
+      expect(html).toContain('role="tablist"');
+      expect(html).toContain('aria-label="EL-06 Automation Process Stages"');
+      expect(html).toContain('role="tab"');
+      expect(html).toContain('aria-selected="true"');
+      expect(html).toContain('aria-controls="stage-panel-describe"');
+    });
+
+    it('renders live preview stage panel with sample snippet and telemetry tag', () => {
+      const html = renderHome();
+      expect(html).toContain('role="tabpanel"');
+      expect(html).toContain('id="stage-panel-describe"');
+      expect(html).toContain('Live Stage Preview');
+      expect(html).toContain('Zero manual syntax required');
+      expect(html).toContain('Take a photo of my grocery bill');
+    });
+
+    it('places the interactive product story BEFORE the primary working input area', () => {
+      const html = renderHome();
+      const storyIndex = html.indexOf('el-story');
+      const workingAreaIndex = html.indexOf('el-home__input-section');
+      expect(storyIndex).toBeGreaterThan(-1);
+      expect(workingAreaIndex).toBeGreaterThan(-1);
+      expect(storyIndex).toBeLessThan(workingAreaIndex);
+    });
+
+    it('renders clear transition header between product story and working area', () => {
+      const html = renderHome();
+      expect(html).toContain('Build Your Automation');
+      expect(html).toContain('Start with what you want to automate');
+    });
+  });
+
+  describe('3. Primary Workflow Input & CTAs', () => {
     it('renders accessible textarea with proper id and label', () => {
       const html = renderHome();
       expect(html).toContain('id="nl-automation-prompt"');
@@ -90,7 +130,7 @@ describe('Phase 11 — Home Page Refinement & Mobile Hardening', () => {
     });
   });
 
-  describe('3. Example Automations & Progressive Disclosure', () => {
+  describe('4. Example Automations & Progressive Disclosure', () => {
     it('renders the 3 simplified example cards with categories', () => {
       const html = renderHome().replace(/&amp;/g, '&');
       expect(EXAMPLE_AUTOMATIONS).toHaveLength(3);
@@ -115,7 +155,7 @@ describe('Phase 11 — Home Page Refinement & Mobile Hardening', () => {
     });
   });
 
-  describe('4. Header & Service Status Area Audit (Standby vs Running)', () => {
+  describe('5. Header & Service Status Area Audit (Standby vs Running)', () => {
     it('subordinates standby notification banner and omits redundant action button when idle', () => {
       const topBarHtml = renderToString(
         React.createElement(TopBar, {
@@ -161,7 +201,7 @@ describe('Phase 11 — Home Page Refinement & Mobile Hardening', () => {
     });
   });
 
-  describe('5. Long Text & Mobile Resiliency', () => {
+  describe('6. Long Text & Mobile Resiliency', () => {
     it('handles long user prompts cleanly within the textarea structure', () => {
       const longPrompt = 'A'.repeat(500) + ' ' + 'B'.repeat(500);
       const html = renderHome();
