@@ -522,6 +522,11 @@ To align with the EL-06 Design Constitution, the following reusable primitives w
 - **Scope:** Redesign Model Registry with spec drawers and model comparison; format Activity audit cards; add `localStorage` persistence to settings and history.
 - **Boundary:** Core registry catalog remains intact.
 
+### Phase 11: Home Page Refinement, Mobile Hardening & Interactive Landing Experience
+- **Scope:** Refine Home page into a focused, product-first entry point. Introduce tactile burnt-orange input focus accent line, 3-step "How It Works" overview (01 Describe, 02 Build, 03 Run), simplified example automations without premature technical metadata overload, and compact standby service status banner in `TopBar`.
+- **Responsive Hardening:** Resolve mobile overflow defects by enforcing `min-width: 0`, `max-width: 100%`, `box-sizing: border-box`, and proper `flex-direction: column` on `.el-input-wrapper` / `.el-input-container`. Harden `.el-textarea` and `.el-card` wrapping. Stack mobile prompt action buttons vertically (`CTA` on top, `Open Blank Canvas` below).
+- **Boundary:** Core routing, model selection, execution engine, and workflow schemas remain untouched (`src/core/*` and `src/types/workflow.ts` 0 changes).
+
 ---
 
 ## 21. Phase 1–10 Dependency Map

@@ -92,7 +92,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onOpenDeviceSettings, onNavigate
             ? 'running'
             : notifState.statusText === 'SUCCESS'
             ? 'completed'
-            : ''
+            : 'standby'
         }`}
       >
         <div className="notification-meta" onClick={onNavigateToExecution} style={{ cursor: 'pointer' }}>
@@ -123,7 +123,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onOpenDeviceSettings, onNavigate
         </div>
 
         <div className="notification-actions">
-          {onNavigateToExecution && (
+          {onNavigateToExecution && notifState.statusText !== 'STANDBY' && (
             <button className="btn-notif-action" onClick={onNavigateToExecution}>
               View Live Graph
             </button>
