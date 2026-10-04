@@ -8,7 +8,7 @@ import {
   Undo2,
   Redo2,
   Sliders,
-  Sparkles,
+  MessageSquare,
 } from 'lucide-react';
 import { ValidationResult } from '../../../types/workflow';
 
@@ -69,7 +69,7 @@ export const StudioToolbar: React.FC<StudioToolbarProps> = ({
             variant="ghost"
             size="sm"
             onClick={onTogglePrompt}
-            leftIcon={<Sparkles size={13} style={{ color: 'var(--color-accent)' }} />}
+            leftIcon={<MessageSquare size={13} style={{ color: 'var(--color-accent)' }} />}
           >
             <span>Describe</span>
           </Button>
@@ -90,29 +90,31 @@ export const StudioToolbar: React.FC<StudioToolbarProps> = ({
 
         <div className="el-studio-toolbar__divider" />
 
-        <Tooltip content="Undo change (Ctrl+Z)" position="bottom">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onUndo}
-            disabled={!canUndo}
-            aria-label="Undo"
-          >
-            <Undo2 size={13} />
-          </Button>
-        </Tooltip>
+        <div className="el-studio-toolbar__undo-group">
+          <Tooltip content="Undo change (Ctrl+Z)" position="bottom">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onUndo}
+              disabled={!canUndo}
+              aria-label="Undo"
+            >
+              <Undo2 size={13} />
+            </Button>
+          </Tooltip>
 
-        <Tooltip content="Redo change (Ctrl+Shift+Z)" position="bottom">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onRedo}
-            disabled={!canRedo}
-            aria-label="Redo"
-          >
-            <Redo2 size={13} />
-          </Button>
-        </Tooltip>
+          <Tooltip content="Redo change (Ctrl+Shift+Z)" position="bottom">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onRedo}
+              disabled={!canRedo}
+              aria-label="Redo"
+            >
+              <Redo2 size={13} />
+            </Button>
+          </Tooltip>
+        </div>
 
         <div className="el-studio-toolbar__mobile-inspector-btn">
           <Button

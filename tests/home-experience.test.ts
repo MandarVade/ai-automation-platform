@@ -179,6 +179,19 @@ describe('Phase 11 — Home Page Refinement & Mobile Hardening', () => {
       expect(topBarHtml).not.toContain('View Live Graph');
     });
 
+    it('removes the telemetry strip and standby status banner when on Home', () => {
+      const topBarHtml = renderToString(
+        React.createElement(TopBar, {
+          currentTab: 'home',
+          onOpenDeviceSettings: vi.fn(),
+          onNavigateToExecution: vi.fn(),
+        })
+      );
+
+      // On Home, TopBar is suppressed during idle/standby state
+      expect(topBarHtml).toBe('');
+    });
+
     it('renders View Live Graph and running progress bar when an automation is active', () => {
       // Mock active notification state
       const controller = NotificationActionController.getInstance();

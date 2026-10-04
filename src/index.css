@@ -2952,18 +2952,23 @@ pre, code {
   border-radius: var(--radius-md);
   gap: var(--space-3);
   flex-wrap: wrap;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .el-studio-toolbar__left {
   display: flex;
   align-items: center;
   gap: var(--space-3);
+  min-width: 0;
 }
 
 .el-studio-toolbar__title-group {
   display: flex;
   align-items: center;
   gap: var(--space-3);
+  min-width: 0;
 }
 
 .el-studio-toolbar__title {
@@ -2984,6 +2989,7 @@ pre, code {
   font-family: var(--font-mono);
   padding: 2px 8px;
   border-radius: var(--radius-xs);
+  flex-shrink: 0;
 }
 
 .el-studio-toolbar__status--valid {
@@ -3002,6 +3008,15 @@ pre, code {
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.el-studio-toolbar__undo-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
 }
 
 .el-studio-toolbar__divider {
@@ -3015,6 +3030,7 @@ pre, code {
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  flex-shrink: 0;
 }
 
 .el-studio-toolbar__mobile-inspector-btn {
@@ -3586,6 +3602,13 @@ pre, code {
   .el-studio-toolbar__mobile-inspector-btn {
     display: flex;
   }
+  .el-studio-toolbar {
+    gap: var(--space-2);
+  }
+  .el-studio-toolbar__center {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
   .el-studio-layout {
     /* Account for AppHeader (~52px) + TopBar (~29px) + BottomNav (64px) + padding = ~160px */
     height: calc(100vh - 160px);
@@ -3600,12 +3623,76 @@ pre, code {
     min-height: 400px;
   }
   .el-studio-toolbar {
-    padding: var(--space-2) var(--space-3);
-    gap: var(--space-2);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 10px 12px;
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  .el-studio-toolbar__left {
+    width: 100%;
+    justify-content: space-between;
+    min-width: 0;
+  }
+  .el-studio-toolbar__title-group {
+    width: 100%;
+    justify-content: space-between;
+    min-width: 0;
   }
   .el-studio-toolbar__title {
-    max-width: 140px;
+    flex: 1;
+    min-width: 0;
+    max-width: calc(100% - 90px);
     font-size: 13px;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-right: var(--space-2);
+  }
+  .el-studio-toolbar__status {
+    flex-shrink: 0;
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+  .el-studio-toolbar__center {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+  }
+  .el-studio-toolbar__center .el-button {
+    font-size: 12px;
+    padding: 4px 8px;
+    height: 30px;
+  }
+  .el-studio-toolbar__divider {
+    display: none;
+  }
+  .el-studio-toolbar__undo-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+  }
+  .el-studio-toolbar__mobile-inspector-btn {
+    display: inline-flex;
+    flex-shrink: 0;
+  }
+  .el-studio-toolbar__right {
+    width: 100%;
+    display: flex;
+  }
+  .el-studio-toolbar__right .el-button {
+    width: 100%;
+    height: 34px;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
   }
   .el-studio-validation-banner {
     font-size: 11px;

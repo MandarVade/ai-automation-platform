@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NodeType, NodeCapability, DataType } from '../../../types/workflow';
 import { Dialog, Input, Button } from '../ui';
-import { Search, Plus, Sparkles, Camera, Mic, Play, FileText, Bot, Database, Bell, Save } from 'lucide-react';
+import { Search, Plus, Camera, Mic, Play, FileText, Database, Bell, Save, Calculator, Tag, Eye, Layers, HelpCircle } from 'lucide-react';
 
 export interface NodeTemplate {
   type: NodeType;
@@ -68,7 +68,7 @@ const AVAILABLE_CAPABILITIES: NodeTemplate[] = [
     description: 'Condense long articles, lecture notes, or transcripts',
     inputTypes: ['TEXT'],
     outputType: 'TEXT',
-    icon: <Bot size={14} />,
+    icon: <FileText size={14} />,
   },
   {
     type: 'AI',
@@ -77,7 +77,7 @@ const AVAILABLE_CAPABILITIES: NodeTemplate[] = [
     description: 'Extract key taxonomy concepts, terms, and structured entities',
     inputTypes: ['TEXT'],
     outputType: 'STRUCTURED_JSON',
-    icon: <Bot size={14} />,
+    icon: <Tag size={14} />,
   },
   {
     type: 'AI',
@@ -86,7 +86,7 @@ const AVAILABLE_CAPABILITIES: NodeTemplate[] = [
     description: 'Synthesize multiple-choice study questions from concepts',
     inputTypes: ['TEXT'],
     outputType: 'STRUCTURED_JSON',
-    icon: <Bot size={14} />,
+    icon: <HelpCircle size={14} />,
   },
   {
     type: 'AI',
@@ -95,7 +95,7 @@ const AVAILABLE_CAPABILITIES: NodeTemplate[] = [
     description: 'Detect visual botanical pathology and diagnose crop symptoms',
     inputTypes: ['IMAGE'],
     outputType: 'STRUCTURED_JSON',
-    icon: <Bot size={14} />,
+    icon: <Eye size={14} />,
   },
   // Transforms
   {
@@ -105,7 +105,7 @@ const AVAILABLE_CAPABILITIES: NodeTemplate[] = [
     description: 'Compute arithmetic sums, taxes, and subtotal validation',
     inputTypes: ['TEXT'],
     outputType: 'STRUCTURED_JSON',
-    icon: <Sparkles size={14} />,
+    icon: <Calculator size={14} />,
   },
   {
     type: 'TRANSFORM',
@@ -114,7 +114,7 @@ const AVAILABLE_CAPABILITIES: NodeTemplate[] = [
     description: 'Map extracted attributes into normalized JSON schema',
     inputTypes: ['TEXT'],
     outputType: 'STRUCTURED_JSON',
-    icon: <Sparkles size={14} />,
+    icon: <Layers size={14} />,
   },
   // Android Actions
   {

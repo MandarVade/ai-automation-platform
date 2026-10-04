@@ -9,7 +9,6 @@ import {
   ArrowDown,
   CheckCircle2,
   Workflow as WorkflowIcon,
-  Sparkles,
   LucideIcon,
 } from 'lucide-react';
 import { MOTION_DURATIONS, MOTION_EASINGS } from '../../motion/motion-tokens';
@@ -113,7 +112,7 @@ export const InteractiveWorkflowStory: React.FC<InteractiveWorkflowStoryProps> =
       {/* Story Header */}
       <div className="el-story__header">
         <div className="el-story__eyebrow">
-          <Sparkles size={13} className="el-story__eyebrow-icon" />
+          <WorkflowIcon size={13} className="el-story__eyebrow-icon" />
           <span>How EL-06 Works</span>
         </div>
         <h2 className="el-story__title">From intent to executable automation</h2>

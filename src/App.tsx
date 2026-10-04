@@ -70,6 +70,7 @@ export const App: React.FC = () => {
     <div className="app-container">
       {/* Top System Bar & Notification Controller */}
       <TopBar
+        currentTab={currentTab}
         onOpenDeviceSettings={() => setIsDeviceModalOpen(true)}
         onNavigateToExecution={() => setIsExecuting(true)}
       />

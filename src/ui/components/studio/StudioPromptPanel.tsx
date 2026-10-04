@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { NLWorkflowPlanner, NLIntentAnalysis } from '../../../core/workflow/nl-planner';
 import { Workflow } from '../../../types/workflow';
 import { Textarea, Button, StatusIndicator } from '../ui';
-import { Sparkles, ArrowRight, X, Layers } from 'lucide-react';
+import { MessageSquare, ArrowRight, X, Layers } from 'lucide-react';
 import { motion, useReducedMotion } from 'motion/react';
 import { MOTION_DURATIONS, MOTION_EASINGS } from '../../motion';
 
@@ -50,7 +50,7 @@ export const StudioPromptPanel: React.FC<StudioPromptPanelProps> = ({
     >
       <div className="el-studio-prompt-panel__header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Sparkles size={14} style={{ color: 'var(--color-accent)' }} />
+          <MessageSquare size={14} style={{ color: 'var(--color-accent)' }} />
           <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
             Natural Language Automation Planner
           </span>
