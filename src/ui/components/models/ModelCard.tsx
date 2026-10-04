@@ -2,7 +2,7 @@ import React from 'react';
 import { ModelSpec, ModelCapability } from '../../../types/model';
 import { Badge, StatusIndicator, Button } from '../ui';
 import { getNodePresentation } from '../studio/node-presentation-registry';
-import { Cpu, Cloud, Layers, Clock, HardDrive, Sparkles, HelpCircle, ArrowRight } from 'lucide-react';
+import { Cpu, Cloud, Layers, Clock, HardDrive, HelpCircle, ArrowRight } from 'lucide-react';
 
 export interface ModelCardProps {
   model: ModelSpec;

@@ -4,8 +4,9 @@ import {
   Mic,
   Play,
   FileText,
-  Bot,
-  Sparkles,
+  Calculator,
+  Tag,
+  Eye,
   Database,
   Bell,
   Save,
@@ -84,13 +85,13 @@ export const getNodePresentation = (
       };
     case 'SUMMARIZATION':
       return {
-        icon: <Bot size={13} />,
+        icon: <FileText size={13} />,
         categoryLabel: 'Language Model',
         dataFlowDescription: 'Long Text → Concise Summary',
       };
     case 'CONCEPT_EXTRACTION':
       return {
-        icon: <Bot size={13} />,
+        icon: <Tag size={13} />,
         categoryLabel: 'Entity Extraction',
         dataFlowDescription: 'Text → Structured Entities',
       };
@@ -102,13 +103,13 @@ export const getNodePresentation = (
       };
     case 'EXPENSE_CATEGORIZATION':
       return {
-        icon: <Sparkles size={13} />,
+        icon: <Tag size={13} />,
         categoryLabel: 'Finance Classifier',
         dataFlowDescription: 'Line Items → Budget Category',
       };
     case 'PLANT_DISEASE_DIAGNOSIS':
       return {
-        icon: <Bot size={13} />,
+        icon: <Eye size={13} />,
         categoryLabel: 'AgroVision Classifier',
         dataFlowDescription: 'Foliage Image → Pathology Diagnosis',
       };
@@ -128,7 +129,7 @@ export const getNodePresentation = (
     // Transforms
     case 'CALCULATE_TOTAL':
       return {
-        icon: <Sparkles size={13} />,
+        icon: <Calculator size={13} />,
         categoryLabel: 'Arithmetic Transform',
         dataFlowDescription: 'Item Text → Validated Arithmetic',
       };
