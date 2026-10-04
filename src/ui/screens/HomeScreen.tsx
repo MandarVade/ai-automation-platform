@@ -102,6 +102,41 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     },
   };
 
+  const heroContainerVariants = {
+    initial: {},
+    animate: {
+      transition: {
+        staggerChildren: shouldReduceMotion ? 0 : 0.07,
+        delayChildren: shouldReduceMotion ? 0 : 0.03,
+      },
+    },
+  };
+
+  const heroItemVariants = {
+    initial: shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 },
+    animate: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: shouldReduceMotion ? 0.05 : 0.48,
+        ease: MOTION_EASINGS.easeOut,
+      },
+    },
+  };
+
+  const heroAtmosphereVariants = {
+    initial: shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96 },
+    animate: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: shouldReduceMotion ? 0.05 : 0.65,
+        ease: MOTION_EASINGS.easeOut,
+        delay: shouldReduceMotion ? 0 : 0.15,
+      },
+    },
+  };
+
   const itemVariants = {
     initial: shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 8 },
     animate: {
@@ -143,24 +178,36 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       animate="animate"
       variants={containerVariants}
     >
-      {/* 1. Hero Section */}
-      <motion.section className="el-home__hero" variants={itemVariants}>
-        <div className="el-home__context-badge">
-          <Badge variant="accent" size="sm">
+      {/* 1. Hero Section (Phase 11C Centered Visual Atmosphere) */}
+      <motion.section
+        className={`el-home__hero ${isFocused ? 'el-home__hero--prompt-focused' : ''}`}
+        variants={heroContainerVariants}
+      >
+        {/* Localized atmospheric orange lighting layer positioned behind and below the headline */}
+        <motion.div
+          className="el-home__hero-atmosphere"
+          aria-hidden="true"
+          variants={heroAtmosphereVariants}
+        >
+          <div className="el-home__hero-light" />
+        </motion.div>
+
+        <motion.div className="el-home__context-badge" variants={heroItemVariants}>
+          <Badge variant="accent" size="sm" className="el-home__eyebrow-badge">
             EL-06 • Autonomous Edge Orchestrator
           </Badge>
-        </div>
+        </motion.div>
 
-        <h1 className="el-home__headline">
+        <motion.h1 className="el-home__headline" variants={heroItemVariants}>
           Build an automation
           <br className="el-home__headline-br" />
           that actually runs.
-        </h1>
+        </motion.h1>
 
-        <p className="el-home__subheadline">
+        <motion.p className="el-home__subheadline" variants={heroItemVariants}>
           Tell EL-06 what you want to automate. It turns your intent into a workflow you can inspect,
           edit, and run directly on your device.
-        </p>
+        </motion.p>
       </motion.section>
 
       {/* 2. Interactive EL-06 Product Story & Visualization */}

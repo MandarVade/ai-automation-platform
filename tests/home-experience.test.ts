@@ -44,6 +44,13 @@ describe('Phase 11 — Home Page Refinement & Mobile Hardening', () => {
       expect(html).not.toContain('transform your productivity');
     });
 
+    it('renders the centered hero atmospheric lighting layer (Phase 11C)', () => {
+      const html = renderHome();
+      expect(html).toContain('el-home__hero-atmosphere');
+      expect(html).toContain('el-home__hero-light');
+      expect(html).toContain('el-home__eyebrow-badge');
+    });
+
     it('renders the 4-stage interactive product story (01 Describe, 02 Build, 03 Route, 04 Run)', () => {
       const html = renderHome();
       expect(html).toContain('How EL-06 Works');
