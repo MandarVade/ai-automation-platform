@@ -192,6 +192,26 @@ describe('Phase 11 — Home Page Refinement & Mobile Hardening', () => {
       expect(topBarHtml).toBe('');
     });
 
+    it('globally removes hardware telemetry strip from all application screens', () => {
+      const screens = ['studio', 'workflows', 'activity', 'models', 'settings'];
+      for (const screen of screens) {
+        const topBarHtml = renderToString(
+          React.createElement(TopBar, {
+            currentTab: screen,
+            onOpenDeviceSettings: vi.fn(),
+            onNavigateToExecution: vi.fn(),
+          })
+        );
+
+        // Hardware telemetry row must never be rendered on any screen
+        expect(topBarHtml).not.toContain('system-status-bar');
+        expect(topBarHtml).not.toContain('10:42 PM');
+        expect(topBarHtml).not.toContain('Wi-Fi 6');
+        expect(topBarHtml).not.toContain('RAM:');
+        expect(topBarHtml).not.toContain('NOMINAL');
+      }
+    });
+
     it('renders View Live Graph and running progress bar when an automation is active', () => {
       // Mock active notification state
       const controller = NotificationActionController.getInstance();

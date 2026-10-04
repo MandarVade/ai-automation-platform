@@ -68,19 +68,19 @@ export const App: React.FC = () => {
 
   return (
     <div className="app-container">
-      {/* Top System Bar & Notification Controller */}
-      <TopBar
-        currentTab={currentTab}
-        onOpenDeviceSettings={() => setIsDeviceModalOpen(true)}
-        onNavigateToExecution={() => setIsExecuting(true)}
-      />
-
       {/* EL-06 Primary Desktop/Mobile Header */}
       <AppHeader
         currentTab={currentTab}
         onTabChange={handleTabChange}
         onOpenDeviceSettings={() => setIsDeviceModalOpen(true)}
         deviceModel={device.deviceModel}
+      />
+
+      {/* Service Status & Execution Notification Controller */}
+      <TopBar
+        currentTab={currentTab}
+        onOpenDeviceSettings={() => setIsDeviceModalOpen(true)}
+        onNavigateToExecution={() => setIsExecuting(true)}
       />
 
       {/* Main Screen Content */}

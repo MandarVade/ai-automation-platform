@@ -195,26 +195,6 @@ button, input, textarea, select {
   padding-bottom: 84px; /* Space for BottomNav */
 }
 
-/* --- Android System Bar --- */
-.system-status-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: var(--bg-app);
-  padding: 6px 18px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-secondary);
-  border-bottom: 1px solid var(--border-subtle);
-  user-select: none;
-}
-
-.system-status-bar .left-group,
-.system-status-bar .right-group {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
 
 .status-pill {
   display: inline-flex;
@@ -1742,11 +1722,6 @@ pre, code {
    EL-06 Application Shell Layout (Phase 2)
    ========================================================================== */
 
-/* TopBar / System Bar enhancements */
-.system-status-bar {
-  background-color: var(--color-bg);
-  border-bottom: 1px solid var(--color-border-subtle);
-}
 
 /* App Header (Desktop primary header + brand + navigation) */
 .el-app-header {
@@ -2015,9 +1990,6 @@ pre, code {
     flex-wrap: wrap;
     gap: 8px;
   }
-  .system-status-bar .right-group .status-pill:not(:first-child):not(:nth-child(2)) {
-    display: none; /* Hide heavy telemetry on small mobile headers to prevent overflow */
-  }
   .el-studio-subnav__hint {
     display: none;
   }
@@ -2040,15 +2012,6 @@ pre, code {
 }
 
 @media (max-width: 480px) {
-  .system-status-bar {
-    padding: 4px 10px;
-  }
-  .system-status-bar .left-group .status-pill {
-    display: none;
-  }
-  .system-status-bar .right-group .status-pill:not(:first-child) {
-    display: none;
-  }
   .main-content {
     padding: 10px 12px 84px 12px;
   }
